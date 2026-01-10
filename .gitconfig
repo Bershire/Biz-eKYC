@@ -1,0 +1,4 @@
+[push]
+    followTags = true
+[blame]
+    ignoreRevsFile = .git-blame-ignore-revs

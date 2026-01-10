@@ -1,0 +1,30 @@
+{
+  "name": "TConnect",
+  "displayName": "TConnect",
+  "version": {
+    "uat": {
+      "androidVersion": "1.0.5",
+      "androidBuildNumber": 4,
+      "iosVersion": "1.0.5",
+      "iosBuildNumber": 4
+    },
+    "prod": {
+      "androidVersion": "1.0.5",
+      "androidBuildNumber": 11,
+      "iosVersion": "1.0.5",
+      "iosBuildNumber": 11
+    }
+  },
+  "expo": {
+    "plugins": [
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "react-native-q4",
+          "organization": "huu-tin"
+        }
+      ]
+    ]
+  }
+}

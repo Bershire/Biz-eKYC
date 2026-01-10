@@ -1,0 +1,249 @@
+apply plugin: "com.android.application"
+apply plugin: "org.jetbrains.kotlin.android"
+apply plugin: "com.facebook.react"
+apply plugin: 'com.google.gms.google-services'
+
+import com.android.build.OutputFile
+import groovy.json.JsonSlurper
+
+/**
+ * This is the configuration block to customize your React Native Android app.
+ * By default you don't need to apply any configuration, just uncomment the lines you need.
+ */
+react {
+    /* Folders */
+    //   The root of your project, i.e. where "package.json" lives. Default is '..'
+    // root = file("../")
+    //   The folder where the react-native NPM package is. Default is ../node_modules/react-native
+    // reactNativeDir = file("../node_modules/react-native")
+    //   The folder where the react-native Codegen package is. Default is ../node_modules/react-native-codegen
+    // codegenDir = file("../node_modules/react-native-codegen")
+    //   The cli.js file which is the React Native CLI entrypoint. Default is ../node_modules/react-native/cli.js
+    // cliFile = file("../node_modules/react-native/cli.js")
+
+    /* Variants */
+    //   The list of variants to that are debuggable. For those we're going to
+    //   skip the bundling of the JS bundle and the assets. By default is just 'debug'.
+    //   If you add flavors like lite, prod, etc. you'll have to list your debuggableVariants.
+    debuggableVariants = ["developmentDebug", "productionDebug"]
+
+    /* Bundling */
+    //   A list containing the node command and its flags. Default is just 'node'.
+    // nodeExecutableAndArgs = ["node"]
+    //
+    //   The command to run when bundling. By default is 'bundle'
+    // bundleCommand = "ram-bundle"
+    //
+    //   The path to the CLI configuration file. Default is empty.
+    // bundleConfig = file(../rn-cli.config.js)
+    //
+    //   The name of the generated asset file containing your JS bundle
+    // bundleAssetName = "MyApplication.android.bundle"
+    //
+    //   The entry file for bundle generation. Default is 'index.android.js' or 'index.ts'
+    // entryFile = file("../js/MyApplication.android.js")
+    //
+    //   A list of extra flags to pass to the 'bundle' commands.
+    //   See https://github.com/react-native-community/cli/blob/main/docs/commands.md#bundle
+    // extraPackagerArgs = []
+
+    /* Hermes Commands */
+    //   The hermes compiler command to run. By default it is 'hermesc'
+    // hermesCommand = "$rootDir/my-custom-hermesc/bin/hermesc"
+    //
+    //   The list of flags to pass to the Hermes compiler. By default is ["-O", "-output-source-map"].
+    hermesFlags = ["-O", "-output-source-map"]
+}
+
+/**
+ * Set this to true to create four separate APKs instead of one,
+ * one for each native architecture. This is useful if you don't
+ * use App Bundles (https://developer.android.com/guide/app-bundle/)
+ * and want to have separate APKs to upload to the Play Store.
+ */
+def enableSeparateBuildPerCPUArchitecture = false
+
+/**
+ * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
+ */
+def enableProguardInReleaseBuilds = true
+
+/**
+ * The preferred build flavor of JavaScriptCore (JSC)
+ *
+ * For example, to use the international variant, you can use:
+ * `def jscFlavor = 'org.webkit:android-jsc-intl:+'`
+ *
+ * The international variant includes ICU i18n library and necessary data
+ * allowing to use e.g. `Date.toLocaleString` and `String.localeCompare` that
+ * give correct results when using with locales other than en-US. Note that
+ * this variant is about 6MiB larger per architecture than default.
+ */
+def jscFlavor = 'org.webkit:android-jsc:+'
+
+// Build configuration
+def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
+def buildDir = "${projectRoot}/builds/android"
+def buildAppName = new JsonSlurper().parse(new File("${projectRoot}/app.json")).name
+def buildDate = new Date().format('yyyy-MM-dd-HH-mm-ss')
+
+// Helper function to only append prefix if string is existed
+def ap(prefix, str) {
+    return str ? prefix + str : ""
+}
+
+// Load release keystore
+def keystorePropertiesFile = rootProject.file("${projectRoot}/android/keystore.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+/**
+ * Private function to get the list of Native Architectures you want to build.
+ * This reads the value from reactNativeArchitectures in your gradle.properties
+ * file and works together with the --active-arch-only flag of react-native run-android.
+ */
+def reactNativeArchitectures() {
+    def value = project.getProperties().get("reactNativeArchitectures")
+    return value ? value.split(",") : ["armeabi-v7a", "x86", "x86_64", "arm64-v8a"]
+}
+
+// Minimal base build: strip Sentry and env config tooling.
+android {
+    lint {
+        disable 'ExtraTranslation'
+    }
+    ndkVersion rootProject.ext.ndkVersion
+
+    buildToolsVersion rootProject.ext.buildToolsVersion
+    compileSdk rootProject.ext.compileSdkVersion
+
+    namespace "com.tconnect.tconnect"
+    defaultConfig {
+        applicationId "com.tconnect.tconnect"
+        versionCode 121
+        versionName "1.0.25"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        resValue "string", "build_config_package", "com.tconnect.tconnect"
+        vectorDrawables.useSupportLibrary = true
+    }
+
+    splits {
+        abi {
+            reset()
+            enable enableSeparateBuildPerCPUArchitecture
+            universalApk true  // If true, also generate a universal APK
+            include (*reactNativeArchitectures())
+        }
+    }
+    signingConfigs {
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+        productionRelease {
+            if (keystoreProperties['storeFile'] != null) {
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+    }
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+            matchingFallbacks = ['debug', 'release']
+        }
+        release {
+            minifyEnabled enableProguardInReleaseBuilds
+            shrinkResources enableProguardInReleaseBuilds
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro", "proguard-rules-ekyc.pro"
+        }
+    }
+
+    // applicationVariants are e.g. debug, release
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            // For each separate APK per architecture, set a unique version code as described here:
+            // https://developer.android.com/studio/build/configure-apk-splits.html
+            // Example: versionCode 1 will generate 1001 for armeabi-v7a, 1002 for x86, etc.
+            def versionCodes = ["armeabi-v7a": 1, "x86": 2, "arm64-v8a": 3, "x86_64": 4]
+            def abi = output.getFilter(OutputFile.ABI)
+            if (abi != null) {  // null for the universal-debug, universal-release variants
+                output.versionCodeOverride =
+                        defaultConfig.versionCode * 1000 + versionCodes.get(abi)
+            }
+
+            if (variant.buildType.name == "release") {
+                def taskSuffix = variant.flavorName.capitalize() + variant.buildType.name.capitalize()
+                File outDir = file("${buildDir}/${variant.flavorName}")
+
+                // Change release build location
+                def outputApkFileName = output.outputFileName
+                def outputAabFileName = outputApkFileName.minus("-${abi}").replaceAll(/\.apk$/, ".aab")
+                def finalOutputApkFileName = "${buildAppName ?: "app"}${ap("_v", variant.versionName)}${ap("_", buildDate)}${ap("_", abi)}.apk"
+                def finalOutputAabFileName = finalOutputApkFileName.minus("_${abi}").replaceAll(/\.apk$/, ".aab")
+
+                // Copy the output apk to the desired build directory
+                // Because gradle supports neither absolute nor relative build path (why)
+                // https://stackoverflow.com/a/75750428
+                def assembleTaskName = "assemble${taskSuffix}"
+                def copyApkTaskName = "publish${taskSuffix}${abi?.capitalize() ?: ""}Apk"
+                if (tasks.findByName(assembleTaskName) && !tasks.findByName(copyApkTaskName)) {
+                    File apkFile = file("${project.buildDir}/outputs/apk${ap("/", variant.flavorName)}${ap("/", variant.buildType.name)}/${outputApkFileName}")
+
+                    def copyApkTask = tasks.create(copyApkTaskName, Copy)
+                    copyApkTask.from apkFile
+                    copyApkTask.into outDir
+                    copyApkTask.include "**/*"
+                    copyApkTask.rename outputApkFileName, finalOutputApkFileName
+
+                    variant.assembleProvider.get().finalizedBy copyApkTask
+                }
+
+                // Copy the output aab to the desired build directory
+                def bundleTaskName = "bundle${taskSuffix}"
+                def copyAabTaskName = "publish${taskSuffix}Aab" // AAB doesn't have separated ABI builds
+                if (tasks.findByName(bundleTaskName) && !tasks.findByName(copyAabTaskName)) {
+                    File aabFile = file("${project.buildDir}/outputs/bundle${ap("/", taskSuffix.uncapitalize())}/${outputAabFileName}")
+
+                    def copyAabTask = tasks.create(copyAabTaskName, Copy)
+                    copyAabTask.from aabFile
+                    copyAabTask.into outDir
+                    copyAabTask.include "**/*"
+                    copyAabTask.rename outputAabFileName, finalOutputAabFileName
+
+                    copyAabTask.mustRunAfter variant.assembleProvider.get()
+                    tasks[bundleTaskName].finalizedBy copyAabTask
+                }
+            }
+        }
+    }
+
+    packagingOptions {
+        pickFirst 'lib/x86/libcrypto.so'
+        pickFirst 'lib/x86_64/libcrypto.so'
+        pickFirst 'lib/armeabi-v7a/libcrypto.so'
+        pickFirst 'lib/arm64-v8a/libcrypto.so'
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+}
+
+dependencies {
+    // The version of react-native is set by the React Native Gradle Plugin
+    implementation("com.facebook.react:react-android")
+    if (hermesEnabled.toBoolean()) {
+        implementation("com.facebook.react:hermes-android")
+    } else {
+        implementation jscFlavor
+    }
+}
+
+apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)

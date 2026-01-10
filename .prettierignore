@@ -1,0 +1,9 @@
+node_modules
+ios
+android
+.vscode
+.yarn
+.husky
+tsconfig.tsbuildinfo
+.eslintcache
+*.lock

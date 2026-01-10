@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <color name="primary">#007BFF</color>
+  <color name="primary_background">#ffffff</color>
+  <color name="bootsplash_background">#0254DB</color>
+  <color name="scrollbar">#73737388</color>
+</resources>

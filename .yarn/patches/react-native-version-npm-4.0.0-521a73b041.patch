@@ -1,0 +1,407 @@
+diff --git a/cli.js b/cli.js
+index 15f4c324b09b01e66d70461355a80db917d9ca62..d078c4ae2d259716bd0c0a4b0e1ce0762bccb04d 100755
+--- a/cli.js
++++ b/cli.js
+@@ -11,10 +11,20 @@ program
+ 	.version(pkg.version)
+ 	.description(pkg.description)
+ 	.arguments("[projectPath]")
++	.option(
++		"-v, --set-version <version>",
++		"Set a version string. Default getting it from project's 'package.json'.",
++		undefined
++	)
+ 	.option(
+ 		"-a, --amend",
+ 		`Amend the previous commit. This is done automatically when ${pkg.name} is run from the "version" or "postversion" npm script. Use "--never-amend" if you never want to amend. Also, if the previous commit is a valid npm-version commit, ${pkg.name} will update the Git tag pointing to this commit.`
+ 	)
++	.option(
++		"-m, --message <message>",
++		"Amend message when amending version commit.\nAny \"%s\" in the message will be replaced with the version number. Any \"%b\" in the message will be replaced with the build number.",
++		undefined
++	)
+ 	.option(
+ 		"--skip-tag",
+ 		'For use with "--amend", if you don\'t want to update Git tags. Use this option if you have git-tag-version set to false in your npm config or you use "--no-git-tag-version" during npm-version.'
+@@ -53,6 +63,14 @@ program
+ 		'Only version specified platforms, e.g. "--target android,ios".',
+ 		list
+ 	)
++	.option(
++		"-f, --android-flavor <flavor>",
++		"Android flavor to set the version to."
++	)
++	.option(
++		"-o, --ios-target <target>",
++		"Ios target to set the version to."
++	)
+ 	.parse(process.argv);
+ 
+ rnv.version(program);
+diff --git a/index.js b/index.js
+index 345f3d410750317151296c8c7e57a98d444bbdcb..e0b1830572403b35bf9184e2531f5d4703f6b878 100644
+--- a/index.js
++++ b/index.js
+@@ -147,38 +147,42 @@ function version(program, projectPath) {
+ 	const targets = [].concat(programOpts.target, env.target).filter(Boolean);
+ 	var appPkg;
+ 
+-	try {
+-		resolveFrom(projPath, "react-native");
+-		appPkg = require(path.join(projPath, "package.json"));
+-	} catch (err) {
+-		if (err.message === "Cannot find module 'react-native'") {
+-			log({
+-				style: "red",
+-				text: `Is this the right folder? ${err.message} in ${projPath}`
+-			});
+-		} else {
+-			log({
+-				style: "red",
+-				text: err.message
+-			});
++	if (programOpts.setVersion) {
++		appPkg = {version: programOpts.setVersion};
++	} else {
++		try {
++			resolveFrom(projPath, "react-native");
++			appPkg = require(path.join(projPath, "package.json"));
++		} catch (err) {
++			if (err.message === "Cannot find module 'react-native'") {
++				log({
++					style: "red",
++					text: `Is this the right folder? ${err.message} in ${projPath}`
++				});
++			} else {
++				log({
++					style: "red",
++					text: err.message
++				});
++
++				log({
++					style: "red",
++					text:
++						"Is this the right folder? Looks like there isn't a package.json here"
++				});
++			}
+ 
+ 			log({
+-				style: "red",
+-				text:
+-					"Is this the right folder? Looks like there isn't a package.json here"
++				style: "yellow",
++				text: "Pass the project path as an argument, see --help for usage"
+ 			});
+-		}
+ 
+-		log({
+-			style: "yellow",
+-			text: "Pass the project path as an argument, see --help for usage"
+-		});
++			if (program.outputHelp) {
++				program.outputHelp();
++			}
+ 
+-		if (program.outputHelp) {
+-			program.outputHelp();
++			process.exit(1);
+ 		}
+-
+-		process.exit(1);
+ 	}
+ 
+ 	var appJSON;
+@@ -204,6 +208,7 @@ function version(program, projectPath) {
+ 
+ 	if (!targets.length || targets.indexOf("android") > -1) {
+ 		android = new Promise(function(resolve, reject) {
++			let newVersionCodeNumber;
+ 			log({ text: "Versioning Android..." }, programOpts.quiet);
+ 
+ 			var gradleFile;
+@@ -225,39 +230,50 @@ function version(program, projectPath) {
+ 			}
+ 
+ 			if (!programOpts.incrementBuild && !isExpoApp) {
++				versionNameRegex = programOpts.androidFlavor
++					? new RegExp(`(productFlavors\\s*{.*?${programOpts.androidFlavor}\\s*{.*?versionName ["'])(.*?)(["'].*?})`, "s")
++					: /(versionName ["'])(.*)(["'])/;
++
+ 				gradleFile = gradleFile.replace(
+-					/versionName (["'])(.*)["']/,
+-					"versionName $1" + appPkg.version + "$1"
++					versionNameRegex,
++					"$1" + appPkg.version + "$3"
+ 				);
+ 			}
+ 
+ 			if (!programOpts.neverIncrementBuild) {
+ 				if (isExpoApp) {
+ 					const versionCode = dottie.get(appJSON, "expo.android.versionCode");
++					newVersionCodeNumber = getNewVersionCode(
++						programOpts,
++						versionCode,
++						appPkg.version
++					);
+ 
+ 					appJSON = Object.assign({}, appJSON, {
+ 						expo: Object.assign({}, appJSON.expo, {
+ 							android: Object.assign({}, appJSON.expo.android, {
+-								versionCode: getNewVersionCode(
+-									programOpts,
+-									versionCode,
+-									appPkg.version
+-								)
++								versionCode: newVersionCodeNumber
+ 							})
+ 						})
+ 					});
+ 				} else {
+-					gradleFile = gradleFile.replace(/versionCode (\d+)/, function(
++					versionCodeRegex = programOpts.androidFlavor
++						? new RegExp(`(productFlavors\\s*{.*?${programOpts.androidFlavor}\\s*{.*?versionCode )(\\d+)(.*?})`, "s")
++						: /(versionCode )(\d+)()/;
++
++					gradleFile = gradleFile.replace(versionCodeRegex, function(
+ 						match,
+-						cg1
++						cg1,
++						cg2,
++						cg3
+ 					) {
+ 						const newVersionCodeNumber = getNewVersionCode(
+ 							programOpts,
+-							parseInt(cg1, 10),
++							parseInt(cg2, 10),
+ 							appPkg.version
+ 						);
+ 
+-						return "versionCode " + newVersionCodeNumber;
++						return cg1 + newVersionCodeNumber + cg3;
+ 					});
+ 				}
+ 			}
+@@ -269,27 +285,29 @@ function version(program, projectPath) {
+ 			}
+ 
+ 			log({ text: "Android updated" }, programOpts.quiet);
+-			resolve();
++			resolve({ versionCode: newVersionCodeNumber });
+ 		});
+ 	}
+ 
+ 	if (!targets.length || targets.indexOf("ios") > -1) {
+ 		ios = new Promise(function(resolve, reject) {
++			let newBuildNumber;
+ 			log({ text: "Versioning iOS..." }, programOpts.quiet);
+ 
+ 			if (isExpoApp) {
+ 				if (!programOpts.neverIncrementBuild) {
+ 					const buildNumber = dottie.get(appJSON, "expo.ios.buildNumber");
++					newBuildNumber = getNewVersionCode(
++						programOpts,
++						parseInt(buildNumber, 10),
++						appPkg.version,
++						programOpts.resetBuild
++					)
+ 
+ 					appJSON = Object.assign({}, appJSON, {
+ 						expo: Object.assign({}, appJSON.expo, {
+ 							ios: Object.assign({}, appJSON.expo.ios, {
+-								buildNumber: getNewVersionCode(
+-									programOpts,
+-									parseInt(buildNumber, 10),
+-									appPkg.version,
+-									programOpts.resetBuild
+-								).toString()
++								buildNumber: newBuildNumber.toString()
+ 							})
+ 						})
+ 					});
+@@ -392,109 +410,58 @@ function version(program, projectPath) {
+ 
+ 				const projectFolder = path.join(programOpts.ios, xcodeProjects[0]);
+ 				const xcode = Xcode.open(path.join(projectFolder, "project.pbxproj"));
+-				const plistFilenames = getPlistFilenames(xcode);
+ 
+ 				xcode.document.projects.forEach(project => {
+ 					!programOpts.neverIncrementBuild &&
+-						project.targets.filter(Boolean).forEach(target => {
+-							target.buildConfigurationsList.buildConfigurations.forEach(
+-								config => {
+-									if (target.name === appPkg.name) {
+-										const CURRENT_PROJECT_VERSION = getNewVersionCode(
+-											programOpts,
+-											parseInt(
+-												config.ast.value
+-													.get("buildSettings")
+-													.get("CURRENT_PROJECT_VERSION").text,
+-												10
+-											),
+-											appPkg.version,
+-											programOpts.resetBuild
+-										);
+-
+-										config.patch({
+-											buildSettings: {
+-												CURRENT_PROJECT_VERSION
+-											}
+-										});
++						project.targets.filter((target) => Boolean(target) &&
++								(programOpts.iosTarget ? target.name === programOpts.iosTarget : true))
++							.forEach(target => {
++								target.buildConfigurationsList.buildConfigurations.forEach(
++									config => {
++										const OLD_CURRENT_PROJECT_VERSION = config.ast.value
++											.get("buildSettings")
++											.get("CURRENT_PROJECT_VERSION").text;
++
++										if (OLD_CURRENT_PROJECT_VERSION !== undefined) {
++											newBuildNumber = getNewVersionCode(
++												programOpts,
++												parseInt(OLD_CURRENT_PROJECT_VERSION, 10),
++												appPkg.version,
++												programOpts.resetBuild
++											);
++
++											config.patch({
++												buildSettings: {
++													CURRENT_PROJECT_VERSION: newBuildNumber
++												}
++											});
++										}
++
++										const OLD_MARKETING_VERSION = config.ast.value
++											.get("buildSettings")
++											.get("MARKETING_VERSION").text;
++
++										if (OLD_MARKETING_VERSION !== undefined) {
++											const MARKETING_VERSION = getCFBundleShortVersionString(
++												appPkg.version
++											);
++
++											config.patch({
++												buildSettings: {
++													MARKETING_VERSION
++												}
++											});
++										}
+ 									}
+-								}
+-							);
++								);
+ 						});
+-
+-					const plistFiles = plistFilenames.map(filename => {
+-						return fs.readFileSync(
+-							path.join(programOpts.ios, filename),
+-							"utf8"
+-						);
+-					});
+-
+-					const parsedPlistFiles = plistFiles.map(file => {
+-						return plist.parse(file);
+-					});
+-
+-					parsedPlistFiles.forEach((json, index) => {
+-						fs.writeFileSync(
+-							path.join(programOpts.ios, plistFilenames[index]),
+-							plist.build(
+-								Object.assign(
+-									{},
+-									json,
+-									!programOpts.incrementBuild
+-										? {
+-												CFBundleShortVersionString: getCFBundleShortVersionString(
+-													appPkg.version
+-												)
+-										  }
+-										: {},
+-									!programOpts.neverIncrementBuild
+-										? {
+-												CFBundleVersion: getNewVersionCode(
+-													programOpts,
+-													parseInt(json.CFBundleVersion, 10),
+-													appPkg.version,
+-													programOpts.resetBuild
+-												).toString()
+-										  }
+-										: {}
+-								)
+-							)
+-						);
+-					});
+-
+-					plistFilenames.forEach((filename, index) => {
+-						const indent = detectIndent(plistFiles[index]);
+-
+-						fs.writeFileSync(
+-							path.join(programOpts.ios, filename),
+-							stripIndents`
+-							<?xml version="1.0" encoding="UTF-8"?>
+-							<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+-							<plist version="1.0">` +
+-								"\n" +
+-								beautify(
+-									fs
+-										.readFileSync(path.join(programOpts.ios, filename), "utf8")
+-										.match(/<dict>[\s\S]*<\/dict>/)[0],
+-									Object.assign(
+-										{ end_with_newline: true },
+-										indent.type === "tab"
+-											? { indent_with_tabs: true }
+-											: { indent_size: indent.amount }
+-									)
+-								) +
+-								stripIndents`
+-							</plist>` +
+-								"\n"
+-						);
+-					});
+ 				});
+ 
+ 				xcode.save();
+ 			}
+ 
+ 			log({ text: "iOS updated" }, programOpts.quiet);
+-			resolve();
++			resolve({ buildNumber: newBuildNumber });
+ 		});
+ 	}
+ 
+@@ -581,7 +548,34 @@ function version(program, projectPath) {
+ 
+ 					case "postversion":
+ 					default:
+-						child.execSync("git commit -a --amend --no-edit", gitCmdOpts);
++						let buildNumber = "";
++						const androidBuildNumber = result[0].value?.versionCode;
++						const iosBuildNumber = result[1].value?.buildNumber;
++
++						if (androidBuildNumber !== undefined && androidBuildNumber === iosBuildNumber) {
++							buildNumber = androidBuildNumber.toString();
++						} else {
++							buildNumber = [];
++
++							if (androidBuildNumber !== undefined) {
++								buildNumber.push("android: " + androidBuildNumber.toString());
++							}
++
++							if (iosBuildNumber !== undefined) {
++								buildNumber.push("ios: " + iosBuildNumber.toString());
++							}
++
++							buildNumber = buildNumber.join(", ");
++						}
++
++						const amendMessage = programOpts.message
++							?.replaceAll(/(?<!\\)%s/g, appPkg.version)
++							.replaceAll(/(?<!\\)%b/g, buildNumber)
++							.replaceAll(/\\(%[sb])/, (_, p) => p)
++
++
++						child.execSync("git commit -a --amend " + (
++							amendMessage ? "-m " + amendMessage : "--no-edit"), gitCmdOpts);
+ 
+ 						if (latestTag) {
+ 							log({ text: "Adjusting Git tag..." }, programOpts.quiet);

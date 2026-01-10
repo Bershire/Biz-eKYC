@@ -1,0 +1,6 @@
+<resources>
+  <style name="AppTheme" parent="RootAppTheme">
+    <item name="android:navigationBarColor">@android:color/transparent</item>
+    <item name="android:windowLightNavigationBar">false</item>
+  </style>
+</resources>

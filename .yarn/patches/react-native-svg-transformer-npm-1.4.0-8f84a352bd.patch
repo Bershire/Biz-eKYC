@@ -1,0 +1,16 @@
+diff --git a/index.js b/index.js
+index 196cbd5081f985514797b6a9da85a6fbb50eeab7..63064ee13e5a3e1be6536be0419f964b6dd284b0 100644
+--- a/index.js
++++ b/index.js
+@@ -10,6 +10,11 @@ const resolveConfigDir = require("path-dirname");
+  * To avoid breaking projects, we should prioritze that package if it is available.
+  */
+ const upstreamTransformer = (() => {
++  // Implementation uses a fragile approach to figure out which babel transformer to use
++  // Makes it uses the one for React Native CLI, which is what's used to bundle our app
++  // https://github.com/kristerkari/react-native-svg-transformer/issues/333
++  return require("@react-native/metro-babel-transformer");
++
+   try {
+     return require("@expo/metro-config/babel-transformer");
+   } catch (error) {

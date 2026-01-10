@@ -1,0 +1,20 @@
+{
+  "tabBar": {
+    "home": "Home",
+    "others": "Others",
+    "account": "Account"
+  },
+  "screens": {
+    "home": "Home",
+    "others": "Others",
+    "account": "Account"
+  },
+  "authentication": {
+    "signIn": "Sign In",
+    "email": "Email",
+    "password": "Password"
+  },
+  "account": {
+    "logout": "Log Out"
+  }
+}

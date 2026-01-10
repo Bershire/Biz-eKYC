@@ -1,0 +1,20 @@
+{
+  "tabBar": {
+    "home": "Trang chu",
+    "others": "Khac",
+    "account": "Tai khoan"
+  },
+  "screens": {
+    "home": "Trang chu",
+    "others": "Khac",
+    "account": "Tai khoan"
+  },
+  "authentication": {
+    "signIn": "Dang nhap",
+    "email": "Email",
+    "password": "Mat khau"
+  },
+  "account": {
+    "logout": "Dang xuat"
+  }
+}

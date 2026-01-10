@@ -1,0 +1,151 @@
+diff --git a/android/src/main/java/com/th3rdwave/safeareacontext/SafeAreaUtils.kt b/android/src/main/java/com/th3rdwave/safeareacontext/SafeAreaUtils.kt
+index 0203be6e472e24336fd9a7508ea68587548fbc20..c3887d3ca0cab1e0c54ef1d90fd5ef418dd95231 100644
+--- a/android/src/main/java/com/th3rdwave/safeareacontext/SafeAreaUtils.kt
++++ b/android/src/main/java/com/th3rdwave/safeareacontext/SafeAreaUtils.kt
+@@ -1,18 +1,24 @@
+ package com.th3rdwave.safeareacontext
+ 
++import android.graphics.Point
++import android.content.Context
+ import android.os.Build
++import android.view.Display
+ import android.view.View
+ import android.view.ViewGroup
+ import android.view.WindowInsets
++import android.view.WindowManager
+ import androidx.annotation.RequiresApi
+ import java.lang.IllegalArgumentException
++import java.lang.reflect.InvocationTargetException
+ import kotlin.math.max
+ import kotlin.math.min
+ 
+ @RequiresApi(Build.VERSION_CODES.R)
+ private fun getRootWindowInsetsCompatR(rootView: View): EdgeInsets? {
++  // TODO: Toggle insets stability
+   val insets =
+-      rootView.rootWindowInsets?.getInsets(
++      rootView.rootWindowInsets?.getInsetsIgnoringVisibility(
+           WindowInsets.Type.statusBars() or
+               WindowInsets.Type.displayCutout() or
+               WindowInsets.Type.navigationBars())
+@@ -41,15 +47,65 @@ private fun getRootWindowInsetsCompatM(rootView: View): EdgeInsets? {
+ }
+ 
+ private fun getRootWindowInsetsCompatBase(rootView: View): EdgeInsets? {
++  val resources = rootView.resources;
++  val statusBarHeightId = resources.getIdentifier("status_bar_height", "dimen", "android")
++  val statusBarHeight = if (statusBarHeightId > 0) resources.getDimensionPixelSize(statusBarHeightId) else 0
++
++  // https://github.com/ConnectyCube/react-native-android-navbar-height/blob/main/android/src/main/java/com/reactnativeandroidnavbarheight/AndroidNavbarHeightModule.java
++  val navigationBarHeight = run {
++    val context = rootView.context
++    val appUsableSize = getAppUsableScreenSize(context)
++    val realScreenSize = getRealScreenSize(context)
++
++    // navigation bar on the side
++    if (appUsableSize.x < realScreenSize.x) {
++      appUsableSize.y
++    } else
++    // navigation bar at the bottom
++    if (appUsableSize.y < realScreenSize.y) {
++      realScreenSize.y - appUsableSize.y
++    } else {
++      // navigation bar is not present
++      0
++    }
++  }
++
+   val visibleRect = android.graphics.Rect()
+   rootView.getWindowVisibleDisplayFrame(visibleRect)
+   return EdgeInsets(
+-      top = visibleRect.top.toFloat(),
++      top = statusBarHeight.toFloat(),
+       right = (rootView.width - visibleRect.right).toFloat(),
+-      bottom = (rootView.height - visibleRect.bottom).toFloat(),
++      bottom = min(rootView.height - visibleRect.bottom, navigationBarHeight).toFloat(),
+       left = visibleRect.left.toFloat())
+ }
+ 
++@Suppress("DEPRECATION")
++private fun getAppUsableScreenSize(context: Context): Point {
++  val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
++  val display = windowManager.defaultDisplay
++  val size = Point()
++  display.getSize(size)
++  return size
++}
++
++@Suppress("DEPRECATION")
++private fun getRealScreenSize(context: Context): Point {
++  val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
++  val display = windowManager.defaultDisplay
++  val size = Point()
++
++  if (Build.VERSION.SDK_INT >= 17) {
++    display.getRealSize(size);
++  } else if (Build.VERSION.SDK_INT >= 14) {
++    try {
++      size.x = Display::class.java.getMethod("getRawWidth").invoke(display) as Int
++      size.y = Display::class.java.getMethod("getRawHeight").invoke(display) as Int
++    } catch (e: IllegalAccessException) {} catch (e: InvocationTargetException) {} catch (e: NoSuchMethodException) {}
++  }
++
++  return size
++}
++
+ private fun getRootWindowInsetsCompat(rootView: View): EdgeInsets? {
+   return when {
+     Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> getRootWindowInsetsCompatR(rootView)
+@@ -78,6 +134,7 @@ fun getSafeAreaInsets(view: View): EdgeInsets? {
+       left = max(windowInsets.left - visibleRect.left, 0f))
+ }
+ 
++// TODO: add frame stability
+ fun getFrame(rootView: ViewGroup, view: View): Rect? {
+   // This can happen while the view gets unmounted.
+   if (view.parent == null) {
+diff --git a/ios/RNCSafeAreaProvider.h b/ios/RNCSafeAreaProvider.h
+index f31adb780d3d135ddb26755c375569b46ca7bf8e..f4c440275a598550c00477a2943130989ed263f6 100644
+--- a/ios/RNCSafeAreaProvider.h
++++ b/ios/RNCSafeAreaProvider.h
+@@ -7,6 +7,7 @@ NS_ASSUME_NONNULL_BEGIN
+ @interface RNCSafeAreaProvider : RCTView
+ 
+ @property (nonatomic, copy) RCTBubblingEventBlock onInsetsChange;
++@property (nonatomic) CGFloat statusBarHeight;
+ 
+ @end
+ 
+diff --git a/ios/RNCSafeAreaProvider.m b/ios/RNCSafeAreaProvider.m
+index 69d537b7ac7c270d0fb3d4bb1d1336eede46172e..9e22b2203af4b30c2b1df1f8b6add33952896096 100644
+--- a/ios/RNCSafeAreaProvider.m
++++ b/ios/RNCSafeAreaProvider.m
+@@ -35,6 +35,11 @@
+   return self;
+ }
+ 
++- (void)didMoveToWindow {
++  [super didMoveToWindow];
++  self.statusBarHeight = self.window.windowScene.statusBarManager.statusBarFrame.size.height;
++}
++
+ - (void)safeAreaInsetsDidChange
+ {
+   [self invalidateSafeAreaInsets];
+@@ -63,13 +68,15 @@
+ 
+   [NSNotificationCenter.defaultCenter postNotificationName:RNCSafeAreaDidChange object:self userInfo:nil];
+ 
++  // TODO: Toggle insets stability
+   self.onInsetsChange(@{
+     @"insets" : @{
+-      @"top" : @(safeAreaInsets.top),
++      @"top" : @(MAX(safeAreaInsets.top, self.statusBarHeight)),
+       @"right" : @(safeAreaInsets.right),
+       @"bottom" : @(safeAreaInsets.bottom),
+       @"left" : @(safeAreaInsets.left),
+     },
++    // TODO: add frame stability
+     @"frame" : @{
+       @"x" : @(frame.origin.x),
+       @"y" : @(frame.origin.y),

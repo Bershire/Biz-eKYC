@@ -1,0 +1,22 @@
+diff --git a/index.js b/index.js
+index a53418709c40e705ec364e3e73919695d1b2ca6a..a80bc349ada51e2a3747f366f4bf7d3e584c0ad6 100644
+--- a/index.js
++++ b/index.js
+@@ -1,5 +1,7 @@
+ /* eslint-disable global-require */
+ 
++const version = require('./package.json').version;
++
+ module.exports = {
+   rules: {
+     'valid-json': require('./src/valid-json'),
+@@ -21,7 +23,8 @@ module.exports = {
+       // since we only return one line in the preprocess step,
+       // we only care about the first array of errors
+       postprocess: ([errors]) => [...errors],
+-      supportsAutofix: true
++      supportsAutofix: true,
++      meta: { name: 'i18n-json', version }
+     }
+   },
+   configs: {

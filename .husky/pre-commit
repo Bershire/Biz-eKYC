@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+if [ $BRANCH = "main" -o $BRANCH = "master" ]; then
+  echo "Direct commits to the $BRANCH branch are not allowed. Please choose another branch."
+  exit 1
+fi
+
+yarn lint-staged

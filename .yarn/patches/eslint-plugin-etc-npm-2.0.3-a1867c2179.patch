@@ -1,0 +1,106 @@
+diff --git a/dist/rules/no-commented-out-code.js b/dist/rules/no-commented-out-code.js
+index 644cc47092abb15ba7ff631b9fd24e40569b37e8..2ac05539402bf6f8f7a7811d555d179204af33d6 100644
+--- a/dist/rules/no-commented-out-code.js
++++ b/dist/rules/no-commented-out-code.js
+@@ -17,8 +17,8 @@ const rule = (0, utils_1.ruleCreator)({
+     },
+     name: "no-commented-out-code",
+     create: (context) => {
+-        const { parse } = require(context.parserPath);
+-        const { project, ...parserOptions } = context.parserOptions;
++        const { parse } = context.languageOptions.parser;
++        const { project, ...parserOptions } = context.languageOptions.parserOptions;
+         const sourceCode = context.getSourceCode();
+         return {
+             Program: () => {
+diff --git a/dist/rules/no-implicit-any-catch.js b/dist/rules/no-implicit-any-catch.js
+index 2d8f30b9e21ad5853e599b8bbf6e224d00d3e26b..9820eae85de33a30d9956aa15726b6475a84b5fa 100644
+--- a/dist/rules/no-implicit-any-catch.js
++++ b/dist/rules/no-implicit-any-catch.js
+@@ -59,46 +59,48 @@ const rule = (0, utils_1.ruleCreator)({
+             }
+             if ((0, eslint_etc_1.hasTypeAnnotation)(param)) {
+                 const { typeAnnotation } = param;
+-                const { typeAnnotation: { type }, } = typeAnnotation;
+-                if (type === experimental_utils_1.AST_NODE_TYPES.TSAnyKeyword) {
+-                    if (allowExplicitAny) {
+-                        return;
+-                    }
+-                    if (!isPromiseCall(callExpression)) {
+-                        return;
+-                    }
+-                    function fix(fixer) {
+-                        return fixer.replaceText(typeAnnotation, ": unknown");
+-                    }
+-                    context.report({
+-                        fix,
+-                        messageId: "explicitAny",
+-                        node: param,
+-                        suggest: [
+-                            {
+-                                messageId: "suggestExplicitUnknown",
+-                                fix,
+-                            },
+-                        ],
+-                    });
+-                }
+-                else if (type !== experimental_utils_1.AST_NODE_TYPES.TSUnknownKeyword) {
+-                    if (!isPromiseCall(callExpression)) {
+-                        return;
++                if (typeAnnotation) {
++                    const { typeAnnotation: { type }, } = typeAnnotation;
++                    if (type === experimental_utils_1.AST_NODE_TYPES.TSAnyKeyword) {
++                        if (allowExplicitAny) {
++                            return;
++                        }
++                        if (!isPromiseCall(callExpression)) {
++                            return;
++                        }
++                        function fix(fixer) {
++                            return fixer.replaceText(typeAnnotation, ": unknown");
++                        }
++                        context.report({
++                            fix,
++                            messageId: "explicitAny",
++                            node: param,
++                            suggest: [
++                                {
++                                    messageId: "suggestExplicitUnknown",
++                                    fix,
++                                },
++                            ],
++                        });
+                     }
+-                    function fix(fixer) {
+-                        return fixer.replaceText(typeAnnotation, ": unknown");
++                    else if (type !== experimental_utils_1.AST_NODE_TYPES.TSUnknownKeyword) {
++                        if (!isPromiseCall(callExpression)) {
++                            return;
++                        }
++                        function fix(fixer) {
++                            return fixer.replaceText(typeAnnotation, ": unknown");
++                        }
++                        context.report({
++                            messageId: "narrowed",
++                            node: param,
++                            suggest: [
++                                {
++                                    messageId: "suggestExplicitUnknown",
++                                    fix,
++                                },
++                            ],
++                        });
+                     }
+-                    context.report({
+-                        messageId: "narrowed",
+-                        node: param,
+-                        suggest: [
+-                            {
+-                                messageId: "suggestExplicitUnknown",
+-                                fix,
+-                            },
+-                        ],
+-                    });
+                 }
+             }
+             else {

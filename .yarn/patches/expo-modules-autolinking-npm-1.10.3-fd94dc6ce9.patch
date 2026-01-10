@@ -1,0 +1,14 @@
+diff --git a/scripts/ios/project_integrator.rb b/scripts/ios/project_integrator.rb
+index 5d46f1ec145f7027114fa1c610236698598d3185..26e38affe6d07d3628194fd6610102cf83b45bf1 100644
+--- a/scripts/ios/project_integrator.rb
++++ b/scripts/ios/project_integrator.rb
+@@ -202,7 +202,8 @@ module Expo
+     # Try not to modify this since it involves changes in the pbxproj so
+     # it's better to modify the support script instead, if possible.
+     def self.generate_xcode_build_script(script_relative_path)
+-      escaped_path = script_relative_path.to_s.gsub(/[^a-zA-Z0-9,\._\+@%\/\-]/) { |char| "\\#{char}" }
++      # "\\ " is not supported by our version updating script, so we have to use "' '" instead
++      escaped_path = script_relative_path.to_s.gsub(/[^a-zA-Z0-9,\._\+@%\/\- ]/) { |char| "\\#{char}" }.gsub(/[ ]/, "' '")
+ 
+       <<~XCODE_BUILD_SCRIPT
+       # This script configures Expo modules and generates the modules provider file.

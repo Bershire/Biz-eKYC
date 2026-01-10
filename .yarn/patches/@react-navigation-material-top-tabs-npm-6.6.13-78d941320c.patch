@@ -1,0 +1,179 @@
+diff --git a/lib/commonjs/views/MaterialTopTabView.js b/lib/commonjs/views/MaterialTopTabView.js
+index 5c6980d461c922bbd4d72412ec0c62608fce1c27..a79e8fb4c5cd78c996338dd87685024c8ab02eaa 100644
+--- a/lib/commonjs/views/MaterialTopTabView.js
++++ b/lib/commonjs/views/MaterialTopTabView.js
+@@ -65,6 +65,7 @@ function MaterialTopTabView(_ref) {
+     lazyPreloadDistance: focusedOptions.lazyPreloadDistance,
+     swipeEnabled: focusedOptions.swipeEnabled,
+     animationEnabled: focusedOptions.animationEnabled,
++    reanimatedAnimation: focusedOptions.reanimatedAnimation,
+     onSwipeStart: () => navigation.emit({
+       type: 'swipeStart'
+     }),
+diff --git a/lib/commonjs/views/MaterialTopTabView.js.map b/lib/commonjs/views/MaterialTopTabView.js.map
+index 7af1d73565c5d9900e44b8c2f40cc9c80ee65270..5066f78fa570e0756208a1dce08de588293152a2 100644
+--- a/lib/commonjs/views/MaterialTopTabView.js.map
++++ b/lib/commonjs/views/MaterialTopTabView.js.map
+@@ -1 +1 @@
+-{"version":3,"names":["MaterialTopTabView","tabBar","props","state","navigation","descriptors","sceneContainerStyle","rest","colors","useTheme","renderTabBar","focusedOptions","routes","index","key","options","dispatch","CommonActions","navigate","name","merge","target","route","render","lazyPlaceholder","lazy","lazyPreloadDistance","swipeEnabled","animationEnabled","emit","type","backgroundColor","background"],"sourceRoot":"../../../src","sources":["views/MaterialTopTabView.tsx"],"mappings":";;;;;;AAAA;AAOA;AACA;AAQA;AAAoD;AAAA;AAAA;AAAA;AAQrC,SAASA,kBAAkB,OAOhC;EAAA,IAPiC;IACzCC,MAAM,GAAIC,KAA6B,iBAAK,oBAAC,0BAAiB,EAAKA,KAAK,CAAI;IAC5EC,KAAK;IACLC,UAAU;IACVC,WAAW;IACXC,mBAAmB;IACnB,GAAGC;EACE,CAAC;EACN,MAAM;IAAEC;EAAO,CAAC,GAAG,IAAAC,gBAAQ,GAAE;EAE7B,MAAMC,YAAY,GAAIR,KAAyB,IAAK;IAClD,OAAOD,MAAM,CAAC;MACZ,GAAGC,KAAK;MACRC,KAAK,EAAEA,KAAK;MACZC,UAAU,EAAEA,UAAU;MACtBC,WAAW,EAAEA;IACf,CAAC,CAAC;EACJ,CAAC;EAED,MAAMM,cAAc,GAAGN,WAAW,CAACF,KAAK,CAACS,MAAM,CAACT,KAAK,CAACU,KAAK,CAAC,CAACC,GAAG,CAAC,CAACC,OAAO;EAEzE,oBACE,oBAAC,2BAAO,eACFR,IAAI;IACR,aAAa,EAAGM,KAAK,IACnBT,UAAU,CAACY,QAAQ,CAAC;MAClB,GAAGC,qBAAa,CAACC,QAAQ,CAAC;QACxBC,IAAI,EAAEhB,KAAK,CAACS,MAAM,CAACC,KAAK,CAAC,CAACM,IAAI;QAC9BC,KAAK,EAAE;MACT,CAAC,CAAC;MACFC,MAAM,EAAElB,KAAK,CAACW;IAChB,CAAC,CACF;IACD,WAAW,EAAE;MAAA,IAAC;QAAEQ;MAAM,CAAC;MAAA,OAAKjB,WAAW,CAACiB,KAAK,CAACR,GAAG,CAAC,CAACS,MAAM,EAAE;IAAA,CAAC;IAC5D,eAAe,EAAEpB,KAAM;IACvB,YAAY,EAAEO,YAAa;IAC3B,qBAAqB,EAAE;MAAA;MAAA,IAAC;QAAEY;MAAM,CAAC;MAAA,OAC/B,oDAAAjB,WAAW,CAACiB,KAAK,CAACR,GAAG,CAAC,CAACC,OAAO,EAACS,eAAe,0DAA9C,kDAAkD,KAAI,IAAI;IAAA,CAC3D;IACD,IAAI,EAAE;MAAA,IAAC;QAAEF;MAAM,CAAC;MAAA,OAAKjB,WAAW,CAACiB,KAAK,CAACR,GAAG,CAAC,CAACC,OAAO,CAACU,IAAI,KAAK,IAAI;IAAA,CAAC;IAClE,mBAAmB,EAAEd,cAAc,CAACe,mBAAoB;IACxD,YAAY,EAAEf,cAAc,CAACgB,YAAa;IAC1C,gBAAgB,EAAEhB,cAAc,CAACiB,gBAAiB;IAClD,YAAY,EAAE,MAAMxB,UAAU,CAACyB,IAAI,CAAC;MAAEC,IAAI,EAAE;IAAa,CAAC,CAAE;IAC5D,UAAU,EAAE,MAAM1B,UAAU,CAACyB,IAAI,CAAC;MAAEC,IAAI,EAAE;IAAW,CAAC,CAAE;IACxD,mBAAmB,EAAE,CACnB;MAAEC,eAAe,EAAEvB,MAAM,CAACwB;IAAW,CAAC,EACtC1B,mBAAmB;EACnB,GACF;AAEN"}
+\ No newline at end of file
++{"version":3,"names":["MaterialTopTabView","tabBar","props","state","navigation","descriptors","sceneContainerStyle","rest","colors","useTheme","renderTabBar","focusedOptions","routes","index","key","options","dispatch","CommonActions","navigate","name","merge","target","route","render","lazyPlaceholder","lazy","lazyPreloadDistance","swipeEnabled","animationEnabled","reanimatedAnimation","emit","type","backgroundColor","background"],"sourceRoot":"../../../src","sources":["views/MaterialTopTabView.tsx"],"mappings":";;;;;;AAAA;AAOA;AACA;AAQA;AAAoD;AAAA;AAAA;AAAA;AAQrC,SAASA,kBAAkB,OAOhC;EAAA,IAPiC;IACzCC,MAAM,GAAIC,KAA6B,iBAAK,oBAAC,0BAAiB,EAAKA,KAAK,CAAI;IAC5EC,KAAK;IACLC,UAAU;IACVC,WAAW;IACXC,mBAAmB;IACnB,GAAGC;EACE,CAAC;EACN,MAAM;IAAEC;EAAO,CAAC,GAAG,IAAAC,gBAAQ,GAAE;EAE7B,MAAMC,YAAY,GAAIR,KAAyB,IAAK;IAClD,OAAOD,MAAM,CAAC;MACZ,GAAGC,KAAK;MACRC,KAAK,EAAEA,KAAK;MACZC,UAAU,EAAEA,UAAU;MACtBC,WAAW,EAAEA;IACf,CAAC,CAAC;EACJ,CAAC;EAED,MAAMM,cAAc,GAAGN,WAAW,CAACF,KAAK,CAACS,MAAM,CAACT,KAAK,CAACU,KAAK,CAAC,CAACC,GAAG,CAAC,CAACC,OAAO;EAEzE,oBACE,oBAAC,2BAAO,eACFR,IAAI;IACR,aAAa,EAAGM,KAAK,IACnBT,UAAU,CAACY,QAAQ,CAAC;MAClB,GAAGC,qBAAa,CAACC,QAAQ,CAAC;QACxBC,IAAI,EAAEhB,KAAK,CAACS,MAAM,CAACC,KAAK,CAAC,CAACM,IAAI;QAC9BC,KAAK,EAAE;MACT,CAAC,CAAC;MACFC,MAAM,EAAElB,KAAK,CAACW;IAChB,CAAC,CACF;IACD,WAAW,EAAE;MAAA,IAAC;QAAEQ;MAAM,CAAC;MAAA,OAAKjB,WAAW,CAACiB,KAAK,CAACR,GAAG,CAAC,CAACS,MAAM,EAAE;IAAA,CAAC;IAC5D,eAAe,EAAEpB,KAAM;IACvB,YAAY,EAAEO,YAAa;IAC3B,qBAAqB,EAAE;MAAA;MAAA,IAAC;QAAEY;MAAM,CAAC;MAAA,OAC/B,oDAAAjB,WAAW,CAACiB,KAAK,CAACR,GAAG,CAAC,CAACC,OAAO,EAACS,eAAe,0DAA9C,kDAAkD,KAAI,IAAI;IAAA,CAC3D;IACD,IAAI,EAAE;MAAA,IAAC;QAAEF;MAAM,CAAC;MAAA,OAAKjB,WAAW,CAACiB,KAAK,CAACR,GAAG,CAAC,CAACC,OAAO,CAACU,IAAI,KAAK,IAAI;IAAA,CAAC;IAClE,mBAAmB,EAAEd,cAAc,CAACe,mBAAoB;IACxD,YAAY,EAAEf,cAAc,CAACgB,YAAa;IAC1C,gBAAgB,EAAEhB,cAAc,CAACiB,gBAAiB;IAClD,mBAAmB,EAAEjB,cAAc,CAACkB,mBAAoB;IACxD,YAAY,EAAE,MAAMzB,UAAU,CAAC0B,IAAI,CAAC;MAAEC,IAAI,EAAE;IAAa,CAAC,CAAE;IAC5D,UAAU,EAAE,MAAM3B,UAAU,CAAC0B,IAAI,CAAC;MAAEC,IAAI,EAAE;IAAW,CAAC,CAAE;IACxD,mBAAmB,EAAE,CACnB;MAAEC,eAAe,EAAExB,MAAM,CAACyB;IAAW,CAAC,EACtC3B,mBAAmB;EACnB,GACF;AAEN"}
+\ No newline at end of file
+diff --git a/lib/module/views/MaterialTopTabView.js b/lib/module/views/MaterialTopTabView.js
+index 7eda7c42dfc497e8f76dcbc0918261c14dc86951..c37096dc5f07b88534cca8c4c5a3fae28c713722 100644
+--- a/lib/module/views/MaterialTopTabView.js
++++ b/lib/module/views/MaterialTopTabView.js
+@@ -56,6 +56,7 @@ export default function MaterialTopTabView(_ref) {
+     lazyPreloadDistance: focusedOptions.lazyPreloadDistance,
+     swipeEnabled: focusedOptions.swipeEnabled,
+     animationEnabled: focusedOptions.animationEnabled,
++    reanimatedAnimation: focusedOptions.reanimatedAnimation,
+     onSwipeStart: () => navigation.emit({
+       type: 'swipeStart'
+     }),
+diff --git a/lib/module/views/MaterialTopTabView.js.map b/lib/module/views/MaterialTopTabView.js.map
+index cdd6012320898491592cb7abbe8c5f2ed8b1586f..ade9a6e99efab81e44adc96c7fcce6c1900a02d4 100644
+--- a/lib/module/views/MaterialTopTabView.js.map
++++ b/lib/module/views/MaterialTopTabView.js.map
+@@ -1 +1 @@
+-{"version":3,"names":["CommonActions","useTheme","React","TabView","MaterialTopTabBar","MaterialTopTabView","tabBar","props","state","navigation","descriptors","sceneContainerStyle","rest","colors","renderTabBar","focusedOptions","routes","index","key","options","dispatch","navigate","name","merge","target","route","render","lazyPlaceholder","lazy","lazyPreloadDistance","swipeEnabled","animationEnabled","emit","type","backgroundColor","background"],"sourceRoot":"../../../src","sources":["views/MaterialTopTabView.tsx"],"mappings":";AAAA,SACEA,aAAa,EAIbC,QAAQ,QACH,0BAA0B;AACjC,OAAO,KAAKC,KAAK,MAAM,OAAO;AAC9B,SAA6BC,OAAO,QAAQ,uBAAuB;AAQnE,OAAOC,iBAAiB,MAAM,qBAAqB;AAQnD,eAAe,SAASC,kBAAkB,OAOhC;EAAA,IAPiC;IACzCC,MAAM,GAAIC,KAA6B,iBAAK,oBAAC,iBAAiB,EAAKA,KAAK,CAAI;IAC5EC,KAAK;IACLC,UAAU;IACVC,WAAW;IACXC,mBAAmB;IACnB,GAAGC;EACE,CAAC;EACN,MAAM;IAAEC;EAAO,CAAC,GAAGZ,QAAQ,EAAE;EAE7B,MAAMa,YAAY,GAAIP,KAAyB,IAAK;IAClD,OAAOD,MAAM,CAAC;MACZ,GAAGC,KAAK;MACRC,KAAK,EAAEA,KAAK;MACZC,UAAU,EAAEA,UAAU;MACtBC,WAAW,EAAEA;IACf,CAAC,CAAC;EACJ,CAAC;EAED,MAAMK,cAAc,GAAGL,WAAW,CAACF,KAAK,CAACQ,MAAM,CAACR,KAAK,CAACS,KAAK,CAAC,CAACC,GAAG,CAAC,CAACC,OAAO;EAEzE,oBACE,oBAAC,OAAO,eACFP,IAAI;IACR,aAAa,EAAGK,KAAK,IACnBR,UAAU,CAACW,QAAQ,CAAC;MAClB,GAAGpB,aAAa,CAACqB,QAAQ,CAAC;QACxBC,IAAI,EAAEd,KAAK,CAACQ,MAAM,CAACC,KAAK,CAAC,CAACK,IAAI;QAC9BC,KAAK,EAAE;MACT,CAAC,CAAC;MACFC,MAAM,EAAEhB,KAAK,CAACU;IAChB,CAAC,CACF;IACD,WAAW,EAAE;MAAA,IAAC;QAAEO;MAAM,CAAC;MAAA,OAAKf,WAAW,CAACe,KAAK,CAACP,GAAG,CAAC,CAACQ,MAAM,EAAE;IAAA,CAAC;IAC5D,eAAe,EAAElB,KAAM;IACvB,YAAY,EAAEM,YAAa;IAC3B,qBAAqB,EAAE;MAAA;MAAA,IAAC;QAAEW;MAAM,CAAC;MAAA,OAC/B,oDAAAf,WAAW,CAACe,KAAK,CAACP,GAAG,CAAC,CAACC,OAAO,EAACQ,eAAe,0DAA9C,kDAAkD,KAAI,IAAI;IAAA,CAC3D;IACD,IAAI,EAAE;MAAA,IAAC;QAAEF;MAAM,CAAC;MAAA,OAAKf,WAAW,CAACe,KAAK,CAACP,GAAG,CAAC,CAACC,OAAO,CAACS,IAAI,KAAK,IAAI;IAAA,CAAC;IAClE,mBAAmB,EAAEb,cAAc,CAACc,mBAAoB;IACxD,YAAY,EAAEd,cAAc,CAACe,YAAa;IAC1C,gBAAgB,EAAEf,cAAc,CAACgB,gBAAiB;IAClD,YAAY,EAAE,MAAMtB,UAAU,CAACuB,IAAI,CAAC;MAAEC,IAAI,EAAE;IAAa,CAAC,CAAE;IAC5D,UAAU,EAAE,MAAMxB,UAAU,CAACuB,IAAI,CAAC;MAAEC,IAAI,EAAE;IAAW,CAAC,CAAE;IACxD,mBAAmB,EAAE,CACnB;MAAEC,eAAe,EAAErB,MAAM,CAACsB;IAAW,CAAC,EACtCxB,mBAAmB;EACnB,GACF;AAEN"}
+\ No newline at end of file
++{"version":3,"names":["CommonActions","useTheme","React","TabView","MaterialTopTabBar","MaterialTopTabView","tabBar","props","state","navigation","descriptors","sceneContainerStyle","rest","colors","renderTabBar","focusedOptions","routes","index","key","options","dispatch","navigate","name","merge","target","route","render","lazyPlaceholder","lazy","lazyPreloadDistance","swipeEnabled","animationEnabled","reanimatedAnimation","emit","type","backgroundColor","background"],"sourceRoot":"../../../src","sources":["views/MaterialTopTabView.tsx"],"mappings":";AAAA,SACEA,aAAa,EAIbC,QAAQ,QACH,0BAA0B;AACjC,OAAO,KAAKC,KAAK,MAAM,OAAO;AAC9B,SAA6BC,OAAO,QAAQ,uBAAuB;AAQnE,OAAOC,iBAAiB,MAAM,qBAAqB;AAQnD,eAAe,SAASC,kBAAkB,OAOhC;EAAA,IAPiC;IACzCC,MAAM,GAAIC,KAA6B,iBAAK,oBAAC,iBAAiB,EAAKA,KAAK,CAAI;IAC5EC,KAAK;IACLC,UAAU;IACVC,WAAW;IACXC,mBAAmB;IACnB,GAAGC;EACE,CAAC;EACN,MAAM;IAAEC;EAAO,CAAC,GAAGZ,QAAQ,EAAE;EAE7B,MAAMa,YAAY,GAAIP,KAAyB,IAAK;IAClD,OAAOD,MAAM,CAAC;MACZ,GAAGC,KAAK;MACRC,KAAK,EAAEA,KAAK;MACZC,UAAU,EAAEA,UAAU;MACtBC,WAAW,EAAEA;IACf,CAAC,CAAC;EACJ,CAAC;EAED,MAAMK,cAAc,GAAGL,WAAW,CAACF,KAAK,CAACQ,MAAM,CAACR,KAAK,CAACS,KAAK,CAAC,CAACC,GAAG,CAAC,CAACC,OAAO;EAEzE,oBACE,oBAAC,OAAO,eACFP,IAAI;IACR,aAAa,EAAGK,KAAK,IACnBR,UAAU,CAACW,QAAQ,CAAC;MAClB,GAAGpB,aAAa,CAACqB,QAAQ,CAAC;QACxBC,IAAI,EAAEd,KAAK,CAACQ,MAAM,CAACC,KAAK,CAAC,CAACK,IAAI;QAC9BC,KAAK,EAAE;MACT,CAAC,CAAC;MACFC,MAAM,EAAEhB,KAAK,CAACU;IAChB,CAAC,CACF;IACD,WAAW,EAAE;MAAA,IAAC;QAAEO;MAAM,CAAC;MAAA,OAAKf,WAAW,CAACe,KAAK,CAACP,GAAG,CAAC,CAACQ,MAAM,EAAE;IAAA,CAAC;IAC5D,eAAe,EAAElB,KAAM;IACvB,YAAY,EAAEM,YAAa;IAC3B,qBAAqB,EAAE;MAAA;MAAA,IAAC;QAAEW;MAAM,CAAC;MAAA,OAC/B,oDAAAf,WAAW,CAACe,KAAK,CAACP,GAAG,CAAC,CAACC,OAAO,EAACQ,eAAe,0DAA9C,kDAAkD,KAAI,IAAI;IAAA,CAC3D;IACD,IAAI,EAAE;MAAA,IAAC;QAAEF;MAAM,CAAC;MAAA,OAAKf,WAAW,CAACe,KAAK,CAACP,GAAG,CAAC,CAACC,OAAO,CAACS,IAAI,KAAK,IAAI;IAAA,CAAC;IAClE,mBAAmB,EAAEb,cAAc,CAACc,mBAAoB;IACxD,YAAY,EAAEd,cAAc,CAACe,YAAa;IAC1C,gBAAgB,EAAEf,cAAc,CAACgB,gBAAiB;IAClD,mBAAmB,EAAEhB,cAAc,CAACiB,mBAAoB;IACxD,YAAY,EAAE,MAAMvB,UAAU,CAACwB,IAAI,CAAC;MAAEC,IAAI,EAAE;IAAa,CAAC,CAAE;IAC5D,UAAU,EAAE,MAAMzB,UAAU,CAACwB,IAAI,CAAC;MAAEC,IAAI,EAAE;IAAW,CAAC,CAAE;IACxD,mBAAmB,EAAE,CACnB;MAAEC,eAAe,EAAEtB,MAAM,CAACuB;IAAW,CAAC,EACtCzB,mBAAmB;EACnB,GACF;AAEN"}
+\ No newline at end of file
+diff --git a/lib/typescript/src/__tests__/index.test.d.ts b/lib/typescript/src/__tests__/index.test.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..121d59b38b6a3c8e8fabd3b46bebfd27aa041e97
+--- /dev/null
++++ b/lib/typescript/src/__tests__/index.test.d.ts
+@@ -0,0 +1,2 @@
++export {};
++//# sourceMappingURL=index.test.d.ts.map
+\ No newline at end of file
+diff --git a/lib/typescript/src/__tests__/index.test.d.ts.map b/lib/typescript/src/__tests__/index.test.d.ts.map
+new file mode 100644
+index 0000000000000000000000000000000000000000..7b9421a0dd3e08f85636496bb3d85ec02a562aa9
+--- /dev/null
++++ b/lib/typescript/src/__tests__/index.test.d.ts.map
+@@ -0,0 +1 @@
++{"version":3,"file":"index.test.d.ts","sourceRoot":"","sources":["../../../../src/__tests__/index.test.tsx"],"names":[],"mappings":""}
+\ No newline at end of file
+diff --git a/lib/typescript/src/types.d.ts b/lib/typescript/src/types.d.ts
+index 3f36fb76f969be6ce953eb92946bf5cb3edaeb2a..660b2ecf5c0032f74647d2ab2920da450635e9cb 100644
+--- a/lib/typescript/src/types.d.ts
++++ b/lib/typescript/src/types.d.ts
+@@ -164,6 +164,10 @@ export type MaterialTopTabNavigationOptions = {
+      * Switching tab via swipe gesture will still result in an animation.
+      */
+     animationEnabled?: boolean;
++    /**
++     * Whether to use react-native-reanimated as animation engine.
++     */
++    reanimatedAnimation?: boolean;
+     /**
+      * Whether this screen should be lazily rendered. When this is set to `true`,
+      * the screen will be rendered as it comes into the viewport.
+diff --git a/lib/typescript/src/types.d.ts.map b/lib/typescript/src/types.d.ts.map
+index d053523f24929127a686c46daffd3f3a17d9ef32..cac17ee047bfb2a4cbd2ac63e9a67aeb179904bd 100644
+--- a/lib/typescript/src/types.d.ts.map
++++ b/lib/typescript/src/types.d.ts.map
+@@ -1 +1 @@
+-{"version":3,"file":"types.d.ts","sourceRoot":"","sources":["../../../src/types.tsx"],"names":[],"mappings":"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"}
+\ No newline at end of file
++{"version":3,"file":"types.d.ts","sourceRoot":"","sources":["../../../src/types.tsx"],"names":[],"mappings":"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"}
+\ No newline at end of file
+diff --git a/lib/typescript/src/views/MaterialTopTabView.d.ts.map b/lib/typescript/src/views/MaterialTopTabView.d.ts.map
+index 3d5b3f0947915474b648fec046b298eb52cea40a..9c8dcf03095259cb884536f1177cf3c0e43e2b69 100644
+--- a/lib/typescript/src/views/MaterialTopTabView.d.ts.map
++++ b/lib/typescript/src/views/MaterialTopTabView.d.ts.map
+@@ -1 +1 @@
+-{"version":3,"file":"MaterialTopTabView.d.ts","sourceRoot":"","sources":["../../../../src/views/MaterialTopTabView.tsx"],"names":[],"mappings":"AAAA,OAAO,EAEL,aAAa,EAEb,kBAAkB,EAEnB,MAAM,0BAA0B,CAAC;AAIlC,OAAO,KAAK,EAEV,2BAA2B,EAC3B,8BAA8B,EAC9B,+BAA+B,EAChC,MAAM,UAAU,CAAC;AAGlB,KAAK,KAAK,GAAG,8BAA8B,GAAG;IAC5C,KAAK,EAAE,kBAAkB,CAAC,aAAa,CAAC,CAAC;IACzC,UAAU,EAAE,+BAA+B,CAAC;IAC5C,WAAW,EAAE,2BAA2B,CAAC;CAC1C,CAAC;AAEF,MAAM,CAAC,OAAO,UAAU,kBAAkB,CAAC,EACzC,MAA4E,EAC5E,KAAK,EACL,UAAU,EACV,WAAW,EACX,mBAAmB,EACnB,GAAG,IAAI,EACR,EAAE,KAAK,eA4CP"}
+\ No newline at end of file
++{"version":3,"file":"MaterialTopTabView.d.ts","sourceRoot":"","sources":["../../../../src/views/MaterialTopTabView.tsx"],"names":[],"mappings":"AAAA,OAAO,EAEL,aAAa,EAEb,kBAAkB,EAEnB,MAAM,0BAA0B,CAAC;AAIlC,OAAO,KAAK,EAEV,2BAA2B,EAC3B,8BAA8B,EAC9B,+BAA+B,EAChC,MAAM,UAAU,CAAC;AAGlB,KAAK,KAAK,GAAG,8BAA8B,GAAG;IAC5C,KAAK,EAAE,kBAAkB,CAAC,aAAa,CAAC,CAAC;IACzC,UAAU,EAAE,+BAA+B,CAAC;IAC5C,WAAW,EAAE,2BAA2B,CAAC;CAC1C,CAAC;AAEF,MAAM,CAAC,OAAO,UAAU,kBAAkB,CAAC,EACzC,MAA4E,EAC5E,KAAK,EACL,UAAU,EACV,WAAW,EACX,mBAAmB,EACnB,GAAG,IAAI,EACR,EAAE,KAAK,eA6CP"}
+\ No newline at end of file
+diff --git a/src/__tests__/index.test.tsx b/src/__tests__/index.test.tsx
+new file mode 100644
+index 0000000000000000000000000000000000000000..d9272866afbac2a72850a107932b74d4ac6e041e
+--- /dev/null
++++ b/src/__tests__/index.test.tsx
+@@ -0,0 +1,53 @@
++import { NavigationContainer, ParamListBase } from '@react-navigation/native';
++import { fireEvent, render } from '@testing-library/react-native';
++import * as React from 'react';
++import { Button, Text, View } from 'react-native';
++
++import {
++  createMaterialTopTabNavigator,
++  MaterialTopTabScreenProps,
++} from '../index';
++
++jest.mock('react-native-pager-view', () => {
++  const React = require('react');
++  const { View } = require('react-native');
++
++  return class ViewPager extends React.Component<React.PropsWithChildren<{}>> {
++    setPage() {}
++
++    render() {
++      return <View>{this.props.children}</View>;
++    }
++  };
++});
++
++it('renders a material top tab navigator with screens', async () => {
++  const Test = ({
++    route,
++    navigation,
++  }: MaterialTopTabScreenProps<ParamListBase>) => (
++    <View>
++      <Text>Screen {route.name}</Text>
++      <Button onPress={() => navigation.navigate('A')} title="Go to A" />
++      <Button onPress={() => navigation.navigate('B')} title="Go to B" />
++    </View>
++  );
++
++  const Tab = createMaterialTopTabNavigator();
++
++  const { findByText, queryByText } = render(
++    <NavigationContainer>
++      <Tab.Navigator>
++        <Tab.Screen name="A" component={Test} />
++        <Tab.Screen name="B" component={Test} />
++      </Tab.Navigator>
++    </NavigationContainer>
++  );
++
++  expect(queryByText('Screen A')).not.toBeNull();
++  expect(queryByText('Screen B')).toBeNull();
++
++  fireEvent(await findByText('Go to B'), 'press');
++
++  expect(queryByText('Screen B')).not.toBeNull();
++});
+diff --git a/src/types.tsx b/src/types.tsx
+index 755627552898d4fc7d90469dd4ff3fd478b1ec92..fb0b87208e9e68c1b9f06a55b40407e092f1234a 100644
+--- a/src/types.tsx
++++ b/src/types.tsx
+@@ -229,6 +229,11 @@ export type MaterialTopTabNavigationOptions = {
+    */
+   animationEnabled?: boolean;
+ 
++  /**
++   * Whether to use react-native-reanimated as animation engine.
++   */
++  reanimatedAnimation?: boolean;
++
+   /**
+    * Whether this screen should be lazily rendered. When this is set to `true`,
+    * the screen will be rendered as it comes into the viewport.
+diff --git a/src/views/MaterialTopTabView.tsx b/src/views/MaterialTopTabView.tsx
+index 12826987b1ee009ec32f2cbaf7f8f0a7af5b8906..b2c19cfb736c15193be3aa3f54a57c06fdba2dfd 100644
+--- a/src/views/MaterialTopTabView.tsx
++++ b/src/views/MaterialTopTabView.tsx
+@@ -65,6 +65,7 @@ export default function MaterialTopTabView({
+       lazyPreloadDistance={focusedOptions.lazyPreloadDistance}
+       swipeEnabled={focusedOptions.swipeEnabled}
+       animationEnabled={focusedOptions.animationEnabled}
++      reanimatedAnimation={focusedOptions.reanimatedAnimation}
+       onSwipeStart={() => navigation.emit({ type: 'swipeStart' })}
+       onSwipeEnd={() => navigation.emit({ type: 'swipeEnd' })}
+       sceneContainerStyle={[

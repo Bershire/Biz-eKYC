@@ -1,0 +1,21 @@
+{
+  "extends": "@react-native/typescript-config/tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "types": ["react-native", "jest", "node"],
+    "module": "esnext",
+    "baseUrl": "./",
+    "paths": {
+      "src/*": ["./src/*"],
+      "tests/*": ["./tests/*"]
+    },
+    "incremental": true,
+    "allowJs": false,
+    "noImplicitOverride": true,
+    "noImplicitReturns": false,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": false,
+    "moduleSuffixes": [".ios", ".android", ".native", ""]
+  },
+  "include": ["index.js", "src/**/*", "tests/**/*"]
+}

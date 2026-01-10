@@ -1,0 +1,28 @@
+diff --git a/android/src/main/java/expo/modules/navigationbar/singletons/NavigationBar.kt b/android/src/main/java/expo/modules/navigationbar/singletons/NavigationBar.kt
+index fdb040645d495bc11164de5375691b07b4f163da..57238fa11bd77b98d2599fc6642932a5da2735d0 100644
+--- a/android/src/main/java/expo/modules/navigationbar/singletons/NavigationBar.kt
++++ b/android/src/main/java/expo/modules/navigationbar/singletons/NavigationBar.kt
+@@ -1,5 +1,7 @@
+ package expo.modules.navigationbar.singletons
+ 
++import android.animation.ArgbEvaluator
++import android.animation.ValueAnimator
+ import android.app.Activity
+ import android.os.Build
+ import android.util.Log
+@@ -17,7 +19,14 @@ object NavigationBar {
+     successCallback: () -> Unit,
+     failureCallback: (reason: String) -> Unit
+   ) {
+-    activity.window.navigationBarColor = color
++    //activity.window.navigationBarColor = color
++    val colorFrom = activity.window.navigationBarColor
++    val colorAnimation = ValueAnimator.ofObject(ArgbEvaluator(), colorFrom, color)
++    colorAnimation.duration = 200
++    colorAnimation.addUpdateListener { animator ->
++      activity.window.navigationBarColor = animator.animatedValue as Int
++    }
++    colorAnimation.start()
+     successCallback()
+   }
+ 

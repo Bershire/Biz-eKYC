@@ -1,0 +1,15 @@
+diff --git a/ast.js b/ast.js
+index d0509944da286e245ec08da30525c1e3872e782a..d1c286ef8b2c0bdf7ae5f34f1ed750fce381c88b 100644
+--- a/ast.js
++++ b/ast.js
+@@ -310,6 +310,10 @@ var StringBlock = /** @class */ (function (_super) {
+     });
+     StringBlock.prototype.toString = function () {
+         // TODO: Unescape the text.
++        if (/^[a-z0-9_./]+$/.test(this.text)) {
++            return this._s1 + this.text;
++        }
++
+         return this._s1 + '"' + this.text + '"';
+     };
+     return StringBlock;

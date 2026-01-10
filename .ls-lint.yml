@@ -1,0 +1,27 @@
+ls:
+  src:
+    .ts: camelCase
+    .tsx: camelCase | PascalCase
+    .android.ts: camelCase
+    .android.tsx: camelCase | PascalCase
+    .ios.ts: camelCase
+    .ios.tsx: camelCase | PascalCase
+    .d.ts: camelCase
+    .json: camelCase
+    assets:
+      .png: kebab-case
+      .jpg: kebab-case
+      .jpeg: kebab-case
+      .bmp: kebab-case
+      .gif: kebab-case
+      .webp: kebab-case
+      .svg: kebab-case
+      images/bootsplash:
+        .png: regex:^bootsplash_logo(|@\d+(|,\d+)x)$
+        .json: snake_case
+
+ignore:
+  - .git
+  - node_modules
+  - android
+  - ios

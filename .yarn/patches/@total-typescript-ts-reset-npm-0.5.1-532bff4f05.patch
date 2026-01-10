@@ -1,0 +1,47 @@
+diff --git a/dist/promise-catch.d.ts b/dist/promise-catch.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..26efc2b6fd0618a9f00c1b5e86195c3c4ed07731
+--- /dev/null
++++ b/dist/promise-catch.d.ts
+@@ -0,0 +1,10 @@
++/// <reference path="utils.d.ts" />
++
++interface Promise<T> {
++  catch<TResult = never>(
++    onrejected?:
++      | ((reason: unknown) => TResult | PromiseLike<TResult>)
++      | undefined
++      | null,
++  ): Promise<T | TResult>;
++}
+diff --git a/dist/promise-catch.js b/dist/promise-catch.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/dist/promise-catch.mjs b/dist/promise-catch.mjs
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/dist/recommended.d.ts b/dist/recommended.d.ts
+index 7e6b2b446f60022726d8d5516577b2a1c9789f13..de628229159badc15f32a3d47410e006fb0af5f7 100644
+--- a/dist/recommended.d.ts
++++ b/dist/recommended.d.ts
+@@ -6,3 +6,4 @@
+ /// <reference path="set-has.d.ts" />
+ /// <reference path="map-has.d.ts" />
+ /// <reference path="array-index-of.d.ts" />
++/// <reference path="promise-catch.d.ts" />
+diff --git a/package.json b/package.json
+index 64810925cf4972ef8fd162bf5841a4457e7d7c05..dd5b4add9069f7681410659814729ba09a530413 100644
+--- a/package.json
++++ b/package.json
+@@ -74,6 +74,11 @@
+       "types": "./dist/storage.d.ts",
+       "import": "./dist/storage.mjs",
+       "default": "./dist/storage.js"
++    },
++    "./promise-catch": {
++      "types": "./dist/promise-catch.d.ts",
++      "import": "./dist/promise-catch.mjs",
++      "default": "./dist/promise-catch.js"
+     }
+   },
+   "keywords": [],

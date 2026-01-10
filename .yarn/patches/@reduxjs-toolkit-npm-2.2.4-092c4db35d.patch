@@ -1,0 +1,13 @@
+diff --git a/dist/query/react/buildHooks.d.ts b/dist/query/react/buildHooks.d.ts
+index 7a4a4bf72ba4a378a03cba1fc780e9fa257c4119..aeab1f931cf4e3ba7c44137c5017ac0f8519cf3f 100644
+--- a/dist/query/react/buildHooks.d.ts
++++ b/dist/query/react/buildHooks.d.ts
+@@ -274,7 +274,7 @@ type UseQueryStateBaseResult<D extends QueryDefinition<any, any, any, any>> = Qu
+      */
+     isError: false;
+ };
+-type UseQueryStateDefaultResult<D extends QueryDefinition<any, any, any, any>> = TSHelpersId<TSHelpersOverride<Extract<UseQueryStateBaseResult<D>, {
++export type UseQueryStateDefaultResult<D extends QueryDefinition<any, any, any, any>> = TSHelpersId<TSHelpersOverride<Extract<UseQueryStateBaseResult<D>, {
+     status: QueryStatus.uninitialized;
+ }>, {
+     isUninitialized: true;

@@ -1,0 +1,57 @@
+diff --git a/lib/index.mjs b/lib/index.mjs
+index a6b6c35e3f0f446289bb7eb2b03197d46bd8f447..e6327a986571e1a2e0974383465e81bb89c2a0df 100644
+--- a/lib/index.mjs
++++ b/lib/index.mjs
+@@ -1043,10 +1043,10 @@ class ZodString extends ZodType {
+                 }
+             }
+             else if (check.kind === "url") {
+-                try {
+-                    new URL(input.data);
+-                }
+-                catch (_a) {
++                const urlRegex = 
++                    /^https?:\/\/(www\.)?[\w#%+.:=@~-]{1,256}\.[\d()a-z]{1,6}\b([\w#%&()+./:=?@~-]*)$/gi;
++                const testResult = urlRegex.test(input.data);
++                if (!testResult) {
+                     ctx = this._getOrReturnCtx(input, ctx);
+                     addIssueToContext(ctx, {
+                         validation: "url",
+diff --git a/lib/index.umd.js b/lib/index.umd.js
+index e08b14b0530e61fc917fa9298b36776cd4096219..36bfbddf965cd12af318695ec449856c7c72b5b5 100644
+--- a/lib/index.umd.js
++++ b/lib/index.umd.js
+@@ -1049,10 +1049,10 @@
+                     }
+                 }
+                 else if (check.kind === "url") {
+-                    try {
+-                        new URL(input.data);
+-                    }
+-                    catch (_a) {
++                    const urlRegex = 
++                        /^https?:\/\/(www\.)?[\w#%+.:=@~-]{1,256}\.[\d()a-z]{1,6}\b([\w#%&()+./:=?@~-]*)$/gi;
++                    const testResult = urlRegex.test(input.data);
++                    if (!testResult) {
+                         ctx = this._getOrReturnCtx(input, ctx);
+                         addIssueToContext(ctx, {
+                             validation: "url",
+diff --git a/lib/types.js b/lib/types.js
+index cf197b3e54dda9b033d872d0376ca6570d8ff8c6..24bd89e6e73b238a7b34126cc665c910232f94d6 100644
+--- a/lib/types.js
++++ b/lib/types.js
+@@ -526,10 +526,10 @@ class ZodString extends ZodType {
+                 }
+             }
+             else if (check.kind === "url") {
+-                try {
+-                    new URL(input.data);
+-                }
+-                catch (_a) {
++                const urlRegex = 
++                    /^https?:\/\/(www\.)?[\w#%+.:=@~-]{1,256}\.[\d()a-z]{1,6}\b([\w#%&()+./:=?@~-]*)$/gi;
++                const testResult = urlRegex.test(input.data);
++                if (!testResult) {
+                     ctx = this._getOrReturnCtx(input, ctx);
+                     (0, parseUtil_1.addIssueToContext)(ctx, {
+                         validation: "url",

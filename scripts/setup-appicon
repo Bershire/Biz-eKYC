@@ -1,0 +1,23 @@
+#!/bin/sh
+
+set -e
+
+INPUT_DIR=$1
+ANDROID_OUTPUT=$2
+IOS_OUTPUT=$3
+IOS_PROJ_NAME=TConnect
+
+if [[ -z "$INPUT_DIR" || -z "$ANDROID_OUTPUT" || -z "$IOS_OUTPUT" ]]; then
+  echo "missing input and/or outputs"
+  exit 1
+fi
+
+# android
+ANDROID_OUTPUT_DIR="android/app/src/$ANDROID_OUTPUT/res/"
+mkdir -p "$ANDROID_OUTPUT_DIR"
+cp -a "$INPUT_DIR/android/." "$ANDROID_OUTPUT_DIR"
+
+# ios
+IOS_OUTPUT_DIR="ios/$IOS_PROJ_NAME/Images.xcassets/$IOS_OUTPUT.appiconset/"
+mkdir -p "$IOS_OUTPUT_DIR"
+cp -a "$INPUT_DIR/ios/AppIcon.appiconset/." "$IOS_OUTPUT_DIR"

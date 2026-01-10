@@ -1,0 +1,158 @@
+#!/bin/sh
+
+# homemade chalks
+normal=$(tput sgr0)
+bold=$(tput bold)
+cyan=$(tput setaf 14)
+red=$(tput setaf 1)
+dim=$(tput setaf 8)
+
+print_help() {
+    echo "Builds your app into an IPA"
+    echo
+    echo "${bold}Usage:${normal} $0 [options]"
+    echo
+    echo "${bold}Options:${normal}"
+    echo "  --mode <string>          Explicitly set the scheme configuration to use (default: \"Release\")"
+    echo "  --scheme <string>        Explicitly set Xcode scheme to use"
+    echo "  --project-path <string>  Path relative to project root where the Xcode project lives. (default: \"ios\")"
+    echo "  --optionsFile <string>   Explicitly set export options plist file (default: \"ExportOptions.plist\")"
+    echo "  --dirty                  Do not clean the project before building"
+    echo "  --verbose                Do not use xcbeautify even if installed"
+    echo "  -h, --help               Output usage information"
+    echo
+    echo "${bold}How to get export options plist file:${normal}"
+    echo "  - Archive and export the project as IPA using Xcode with appropriate options"
+    echo "  - Take the \"ExportOptions.plist\" inside the IPA folder and use it"
+}
+
+print_info() {
+    echo "${bold}${cyan}info${normal} $1"
+}
+
+print_error_and_exit() {
+    >&2 echo "${bold}${red}error${normal} $1"
+    exit 1
+}
+
+CONFIGURATION=Release
+SCHEME=
+PROJECT_PATH=ios
+EXPORT_OPTIONS_FILE=ExportOptions.plist
+CLEAN=yeah
+BEAUTIFIER=
+
+if command -v "xcbeautify" &> /dev/null; then
+    BEAUTIFIER=xcbeautify
+fi
+
+while true; do
+  case "$1" in
+    --mode)
+        CONFIGURATION="$2"
+        shift 2
+        ;;
+    --scheme)
+        SCHEME="$2"
+        shift 2
+        ;;
+    --project-path)
+        PROJECT_PATH="$2"
+        shift 2
+        ;;
+    --dirty)
+        CLEAN=
+        shift
+        ;;
+    --verbose)
+        BEAUTIFIER=
+        shift
+        ;;
+    -h | --help)
+        print_help
+        exit
+        ;;
+    *)
+        [ ! -z "$1" ] && print_error_and_exit "Invalid option: $1"
+        break
+        ;;
+  esac
+done
+
+[ ! -d "$PROJECT_PATH" ] && print_error_and_exit "Project folder not found"
+CURRENT_DIR=$(pwd)
+cd "$PROJECT_PATH"
+
+TMP_BUILD_DIR="build"
+mkdir -p "$TMP_BUILD_DIR"
+
+ARCHIVE_NAME=archive.xcarchive
+EXPORT_NAME=ipa
+WORKSPACE_DIR=$(find . -type d -name "*.xcworkspace" -maxdepth 1 | head -n 1)
+
+[ ! -d "$WORKSPACE_DIR" ] && print_error_and_exit "No Xcode workspace found"
+print_info "Found Xcode workspace \"${bold}$(basename "$WORKSPACE_DIR")${normal}\""
+
+[ ! -f "$EXPORT_OPTIONS_FILE" ] && print_error_and_exit "Export options plist file not found"
+
+BUILD_DATE=$(date +%F-%H-%M-%S)
+
+if [ ! -z "$BEAUTIFIER" ]; then
+    # make xcbeautify exits with the same status code as xcodebuild
+    set -o pipefail
+fi
+
+archive_cmd="xcodebuild \
+-workspace \"$WORKSPACE_DIR\" \
+${SCHEME:+-scheme \"$SCHEME\"} \
+-configuration \"$CONFIGURATION\" \
+-archivePath \"$TMP_BUILD_DIR/$ARCHIVE_NAME\" \
+-destination generic/platform=iOS \
+-sdk iphoneos \
+${CLEAN:+clean }archive"
+
+print_info "Archiving ${dim}(Using '$archive_cmd')${normal}"
+eval "$archive_cmd | { if [ ! -z \"$BEAUTIFIER\" ]; then \"$BEAUTIFIER\"; else cat -; fi; }"
+
+[ $? != 0 ] && print_error_and_exit "Failed to archive project"
+
+export_cmd="xcodebuild \
+-exportArchive \
+-archivePath \"$TMP_BUILD_DIR/$ARCHIVE_NAME\" \
+-exportOptionsPlist \"$EXPORT_OPTIONS_FILE\" \
+-exportPath \"$TMP_BUILD_DIR/$EXPORT_NAME\""
+
+print_info "Exporting ${dim}(Using '$export_cmd')${normal}"
+eval "$export_cmd | { if [ ! -z \"$BEAUTIFIER\" ]; then \"$BEAUTIFIER\"; else cat -; fi; }"
+
+[ $? != 0 ] && print_error_and_exit "Failed to export IPA"
+
+print_info "Copying to final build folder"
+
+cd "$CURRENT_DIR"
+FINAL_BUILD_DIR="builds/ios${SCHEME:+/$SCHEME}"
+mkdir -p "$FINAL_BUILD_DIR"
+
+BUILD_APP_NAME=
+BUILD_APP_VERSION=
+
+if [ -f "app.json" ]; then
+    BUILD_APP_NAME=$(cat "app.json" | tr '\n' ' ' | sed -nr 's/.*"name"[[:space:]]*:[[:space:]]*"([^"]*)".*/\1/p')
+fi
+
+if command -v "xmllint" &> /dev/null && [ -f "$PROJECT_PATH/$TMP_BUILD_DIR/$EXPORT_NAME/DistributionSummary.plist" ]; then
+    if [ -z "$BUILD_APP_NAME" ]; then
+        BUILD_APP_NAME=$(xmllint \
+            --xpath '/plist/dict/array/dict/key[normalize-space() = "name"]/following-sibling::string[1]/text()' \
+            "$PROJECT_PATH/$TMP_BUILD_DIR/$EXPORT_NAME/DistributionSummary.plist" 2> /dev/null)
+    fi
+
+    BUILD_APP_VERSION=$(xmllint \
+        --xpath '/plist/dict/array/dict/key[normalize-space() = "versionNumber"]/following-sibling::string[1]/text()' \
+        "$PROJECT_PATH/$TMP_BUILD_DIR/$EXPORT_NAME/DistributionSummary.plist" 2> /dev/null)
+fi
+
+cp -r "$PROJECT_PATH/$TMP_BUILD_DIR/$EXPORT_NAME" "$FINAL_BUILD_DIR/${BUILD_APP_NAME:-app}_v${BUILD_APP_VERSION:-unknown}_${BUILD_DATE}"
+
+[ $? != 0 ] && print_error_and_exit "Failed to copy IPA to the correct folder"
+print_info "Copy succeeded"

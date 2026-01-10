@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+
+prevHEAD=$1
+newHEAD=$2
+
+changed () {
+    git diff --name-only "$prevHEAD" "$newHEAD" | grep "^$1" >/dev/null 2>&1
+}
+
+if changed 'yarn.lock'; then
+    echo "yarn.lock changed. Running 'yarn install' to bring your dependencies up to date..."
+    yarn install
+fi
+
+exit 0

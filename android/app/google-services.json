@@ -1,0 +1,142 @@
+{
+  "project_info": {
+    "project_number": "49948682737",
+    "project_id": "atomic-sled-364302",
+    "storage_bucket": "atomic-sled-364302.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:49948682737:android:ae62079470339a1b0abc50",
+        "android_client_info": {
+          "package_name": "com.tconnect.tconnect"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "49948682737-1s043t152j1ik2j7h805davlvo0ctsus.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tconnect.tconnect",
+            "certificate_hash": "cd42df9b0d1f74e2878c2c753a1c1a0b64222548"
+          }
+        },
+        {
+          "client_id": "49948682737-qm6k1cf348dr2kuo7cu9p2iijgj85rp9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tconnect.tconnect",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "49948682737-ms7pdfoajp7110re6fji5r0s8go4bf20.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCy32itezjC4COMmqGB9Pq7xlyP_DiDUoA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "49948682737-ms7pdfoajp7110re6fji5r0s8go4bf20.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "49948682737-6mnvos2jbk4lnkac4nda1uqnqmcns6ja.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.tconnect.tconnect"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:49948682737:android:3b518a9dabd35e190abc50",
+        "android_client_info": {
+          "package_name": "com.tconnect.tconnect.uat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "49948682737-a3j0p3bk4issr6en9s362l03rqnm03pn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tconnect.tconnect.uat",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "49948682737-ms7pdfoajp7110re6fji5r0s8go4bf20.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCy32itezjC4COMmqGB9Pq7xlyP_DiDUoA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "49948682737-ms7pdfoajp7110re6fji5r0s8go4bf20.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "49948682737-6mnvos2jbk4lnkac4nda1uqnqmcns6ja.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.tconnect.tconnect"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:49948682737:android:609d795d4d634e2d0abc50",
+        "android_client_info": {
+          "package_name": "com.tconnect.uat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "49948682737-ms7pdfoajp7110re6fji5r0s8go4bf20.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCy32itezjC4COMmqGB9Pq7xlyP_DiDUoA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "49948682737-ms7pdfoajp7110re6fji5r0s8go4bf20.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "49948682737-6mnvos2jbk4lnkac4nda1uqnqmcns6ja.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.tconnect.tconnect"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

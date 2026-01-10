@@ -1,0 +1,86 @@
+diff --git a/ios/src/Compression.h b/ios/src/Compression.h
+index 4825b4873ef9f74d3970655c9d7372d4d509773c..61d1a786ca73289888a71134cf3efa46c2697438 100644
+--- a/ios/src/Compression.h
++++ b/ios/src/Compression.h
+@@ -16,6 +16,7 @@
+ @property NSNumber *width;
+ @property NSNumber *height;
+ @property NSString *mime;
++@property NSString *ext;
+ @property UIImage *image;
+ 
+ @end
+diff --git a/ios/src/Compression.m b/ios/src/Compression.m
+index 4f8e6800d576cbdefb0999bb61e5784b6ae4e177..ccb155cd4cf902815654fe09f63b72ea4832b500 100644
+--- a/ios/src/Compression.m
++++ b/ios/src/Compression.m
+@@ -72,6 +72,7 @@
+     result.height = @(image.size.height);
+     result.image = image;
+     result.mime = @"image/jpeg";
++    result.ext = @"jpg";
+     
+     NSNumber *compressImageMaxWidth = [options valueForKey:@"compressImageMaxWidth"];
+     NSNumber *compressImageMaxHeight = [options valueForKey:@"compressImageMaxHeight"];
+diff --git a/ios/src/ImageCropPicker.m b/ios/src/ImageCropPicker.m
+index 9f20973f1d641a8c3b96e825c1a4888eb80b55f9..e3fdcc3b363d073560eb4b8215640664438f7f87 100644
+--- a/ios/src/ImageCropPicker.m
++++ b/ios/src/ImageCropPicker.m
+@@ -575,6 +575,7 @@ RCT_EXPORT_METHOD(openCropper:(NSDictionary *)options
+                          resultHandler:^(NSData *imageData, NSString *dataUTI, UIImageOrientation orientation, NSDictionary *info) {
+                             
+                             NSURL *sourceURL = contentEditingInput.fullSizeImageURL;
++                            NSString *sourceExt = [[[sourceURL lastPathComponent] pathExtension] lowercaseString];
+                             
+                             dispatch_async(dispatch_get_main_queue(), ^{
+                                 [lock lock];
+@@ -603,6 +604,7 @@ RCT_EXPORT_METHOD(openCropper:(NSDictionary *)options
+                                         imageResult.height = @(imgT.size.height);
+                                         imageResult.mime = mimeType;
+                                         imageResult.image = imgT;
++                                        imageResult.ext = sourceExt;
+                                     } else {
+                                         imageResult = [self.compression compressImage:[imgT fixOrientation] withOptions:self.options];
+                                     }
+@@ -610,7 +612,7 @@ RCT_EXPORT_METHOD(openCropper:(NSDictionary *)options
+                                     NSString *filePath = @"";
+                                     if([[self.options objectForKey:@"writeTempFile"] boolValue]) {
+                                         
+-                                        filePath = [self persistFile:imageResult.data];
++                                        filePath = [self persistFile:imageResult.data ext:imageResult.ext];
+                                         
+                                         if (filePath == nil) {
+                                             [indicatorView stopAnimating];
+@@ -745,7 +747,7 @@ RCT_EXPORT_METHOD(openCropper:(NSDictionary *)options
+         [self cropImage:[image fixOrientation]];
+     } else {
+         ImageResult *imageResult = [self.compression compressImage:[image fixOrientation]  withOptions:self.options];
+-        NSString *filePath = [self persistFile:imageResult.data];
++        NSString *filePath = [self persistFile:imageResult.data ext:imageResult.ext];
+         if (filePath == nil) {
+             [viewController dismissViewControllerAnimated:YES completion:[self waitAnimationEnd:^{
+                 self.reject(ERROR_CANNOT_SAVE_IMAGE_KEY, ERROR_CANNOT_SAVE_IMAGE_MSG, nil);
+@@ -808,7 +810,7 @@ RCT_EXPORT_METHOD(openCropper:(NSDictionary *)options
+     UIImage *resizedImage = [croppedImage resizedImageToFitInSize:desiredImageSize scaleIfSmaller:YES];
+     ImageResult *imageResult = [self.compression compressImage:resizedImage withOptions:self.options];
+     
+-    NSString *filePath = [self persistFile:imageResult.data];
++    NSString *filePath = [self persistFile:imageResult.data ext:imageResult.ext];
+     if (filePath == nil) {
+         [self dismissCropper:controller selectionDone:YES completion:[self waitAnimationEnd:^{
+             self.reject(ERROR_CANNOT_SAVE_IMAGE_KEY, ERROR_CANNOT_SAVE_IMAGE_MSG, nil);
+@@ -842,11 +844,12 @@ RCT_EXPORT_METHOD(openCropper:(NSDictionary *)options
+ 
+ // at the moment it is not possible to upload image by reading PHAsset
+ // we are saving image and saving it to the tmp location where we are allowed to access image later
+-- (NSString*) persistFile:(NSData*)data {
++- (NSString*) persistFile:(NSData*)data
++                      ext:(NSString*)ext{
+     // create temp file
+     NSString *tmpDirFullPath = [self getTmpDirectory];
+     NSString *filePath = [tmpDirFullPath stringByAppendingString:[[NSUUID UUID] UUIDString]];
+-    filePath = [filePath stringByAppendingString:@".jpg"];
++    filePath = [[filePath stringByAppendingString:@"."] stringByAppendingString:ext];
+     
+     // save cropped file
+     BOOL status = [data writeToFile:filePath atomically:YES];

@@ -1,0 +1,10 @@
+{
+  "search.exclude": {
+    "yarn.lock": true,
+    "Gemfile.lock": true,
+    "ios/Podfile.lock": true
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "java.configuration.updateBuildConfiguration": "disabled",
+  "eslint.experimental.useFlatConfig": true,
+}

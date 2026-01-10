@@ -1,0 +1,20 @@
+{
+  "tabBar": {
+    "home": "ホーム",
+    "others": "その他",
+    "account": "アカウント"
+  },
+  "screens": {
+    "home": "ホーム",
+    "others": "その他",
+    "account": "アカウント"
+  },
+  "authentication": {
+    "signIn": "ログイン",
+    "email": "メール",
+    "password": "パスワード"
+  },
+  "account": {
+    "logout": "ログアウト"
+  }
+}

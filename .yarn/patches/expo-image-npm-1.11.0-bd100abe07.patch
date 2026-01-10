@@ -1,0 +1,26 @@
+diff --git a/android/src/main/java/expo/modules/image/drawing/OutlineProvider.kt b/android/src/main/java/expo/modules/image/drawing/OutlineProvider.kt
+index 19915ccdf6f28043d48949e4fa26b1c520890356..904db7cc02a10c3846d420c1ec6f0a9722d3edff 100644
+--- a/android/src/main/java/expo/modules/image/drawing/OutlineProvider.kt
++++ b/android/src/main/java/expo/modules/image/drawing/OutlineProvider.kt
+@@ -12,6 +12,7 @@ import com.facebook.react.uimanager.FloatUtil
+ import com.facebook.react.uimanager.PixelUtil
+ import com.facebook.yoga.YogaConstants
+ import expo.modules.image.ifYogaUndefinedUse
++import kotlin.math.min
+ 
+ class OutlineProvider(private val mContext: Context) : ViewOutlineProvider() {
+   enum class BorderRadiusConfig {
+@@ -177,7 +178,12 @@ class OutlineProvider(private val mContext: Context) : ViewOutlineProvider() {
+     if (hasEqualCorners()) {
+       val cornerRadius = mCornerRadii[0]
+       if (cornerRadius > 0) {
+-        outline.setRoundRect(0, 0, mBounds.width().toInt(), mBounds.height().toInt(), cornerRadius)
++        val width = mBounds.width().toInt()
++        val height = mBounds.height().toInt()
++
++        val minSize = min(width, height).toFloat()
++        outline.setRoundRect(0, 0, width, height,
++          if (cornerRadius * 2 > minSize) minSize / 2 else cornerRadius)
+       } else {
+         outline.setRect(0, 0, mBounds.width().toInt(), mBounds.height().toInt())
+       }

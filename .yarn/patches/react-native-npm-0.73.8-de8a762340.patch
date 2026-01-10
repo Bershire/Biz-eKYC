@@ -1,0 +1,53 @@
+diff --git a/Libraries/Lists/FlatList.d.ts b/Libraries/Lists/FlatList.d.ts
+index 5bbe2fa3b80c7a0c4823b075906a6b33b12e6b36..6d9ef5f604074fb42fed7821e48c00071e29820f 100644
+--- a/Libraries/Lists/FlatList.d.ts
++++ b/Libraries/Lists/FlatList.d.ts
+@@ -239,7 +239,7 @@ export abstract class FlatListComponent<
+   setNativeProps: (props: {[key: string]: any}) => void;
+ }
+ 
+-export class FlatList<ItemT = any> extends FlatListComponent<
++export class FlatList<ItemT> extends FlatListComponent<
+   ItemT,
+   FlatListProps<ItemT>
+ > {}
+diff --git a/Libraries/Lists/SectionList.d.ts b/Libraries/Lists/SectionList.d.ts
+index 396092286b05d1c3b16e042e918b00268a0cb2ff..e9dc269a49a3ed019d3eb4d0059eeb7246845e21 100644
+--- a/Libraries/Lists/SectionList.d.ts
++++ b/Libraries/Lists/SectionList.d.ts
+@@ -246,8 +246,8 @@ export abstract class SectionListComponent<
+ }
+ 
+ export class SectionList<
+-  ItemT = any,
+-  SectionT = DefaultSectionT,
++  ItemT,
++  SectionT,
+ > extends SectionListComponent<SectionListProps<ItemT, SectionT>> {}
+ 
+ /* This definition is deprecated because it extends the wrong base type */
+diff --git a/Libraries/Text/TextInput/Multiline/RCTUITextView.mm b/Libraries/Text/TextInput/Multiline/RCTUITextView.mm
+index 582b49c1ef4f4b468864f4bad3eb014f72ba1c9a..25704706189e678f03fd134cdbb8d3f87c3d0687 100644
+--- a/Libraries/Text/TextInput/Multiline/RCTUITextView.mm
++++ b/Libraries/Text/TextInput/Multiline/RCTUITextView.mm
+@@ -52,6 +52,7 @@ static UIColor *defaultPlaceholderColor(void)
+     self.textContainer.lineFragmentPadding = 0;
+     self.scrollsToTop = NO;
+     self.scrollEnabled = YES;
++    self.showsVerticalScrollIndicator = NO;
+   }
+ 
+   return self;
+diff --git a/Libraries/Text/TextInput/RCTBaseTextInputShadowView.mm b/Libraries/Text/TextInput/RCTBaseTextInputShadowView.mm
+index 9455bd5734487d12174684e317e9b642e7f69e36..8f151c25f914d2586c543a4f36d1d112eb885c5c 100644
+--- a/Libraries/Text/TextInput/RCTBaseTextInputShadowView.mm
++++ b/Libraries/Text/TextInput/RCTBaseTextInputShadowView.mm
+@@ -87,7 +87,7 @@
+     return;
+   }
+ 
+-  CGSize maximumSize = self.layoutMetrics.frame.size;
++  CGSize maximumSize = self.layoutMetrics.contentFrame.size;
+ 
+   if (_maximumNumberOfLines == 1) {
+     maximumSize.width = CGFLOAT_MAX;

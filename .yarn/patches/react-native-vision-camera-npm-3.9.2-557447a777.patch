@@ -1,0 +1,705 @@
+diff --git a/android/src/main/java/com/mrousavy/camera/CameraView+TakePhoto.kt b/android/src/main/java/com/mrousavy/camera/CameraView+TakePhoto.kt
+index c09ae3f4fefc6aedffa04188a306c69f57f395b5..b89900c45cd234cdfd7a86d4b35b9da85df914fc 100644
+--- a/android/src/main/java/com/mrousavy/camera/CameraView+TakePhoto.kt
++++ b/android/src/main/java/com/mrousavy/camera/CameraView+TakePhoto.kt
+@@ -8,6 +8,7 @@ import android.graphics.ImageFormat
+ import android.graphics.Matrix
+ import android.hardware.camera2.*
+ import android.util.Log
++import androidx.exifinterface.media.ExifInterface
+ import com.facebook.react.bridge.Arguments
+ import com.facebook.react.bridge.ReadableMap
+ import com.facebook.react.bridge.WritableMap
+@@ -66,11 +67,12 @@ suspend fun CameraView.takePhoto(optionsMap: ReadableMap): WritableMap {
+ 
+     Log.i(TAG, "Successfully saved photo to file! $path")
+ 
++    val exif = ExifInterface(path)
+     val map = Arguments.createMap()
+     map.putString("path", path)
+-    map.putInt("width", photo.image.width)
+-    map.putInt("height", photo.image.height)
+-    map.putString("orientation", photo.orientation.unionValue)
++    map.putInt("width", exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, photo.image.width))
++    map.putInt("height", exif.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, photo.image.height))
++    map.putString("orientation", orientation.unionValue)
+     map.putBoolean("isRawPhoto", photo.format == ImageFormat.RAW_SENSOR)
+     map.putBoolean("isMirrored", photo.isMirrored)
+ 
+@@ -80,21 +82,26 @@ suspend fun CameraView.takePhoto(optionsMap: ReadableMap): WritableMap {
+ 
+ private fun writePhotoToFile(photo: CameraSession.CapturedPhoto, file: File) {
+   val byteBuffer = photo.image.planes[0].buffer
++  val imageBytes = ByteArray(byteBuffer.remaining()).apply { byteBuffer.get(this) }
++  val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
++  val matrix = Matrix()
++
++  if (photo.imageOrientation.toDegrees() != 0) {
++    matrix.setRotate(photo.imageOrientation.toDegrees().toFloat())
++  }
+   if (photo.isMirrored) {
+-    val imageBytes = ByteArray(byteBuffer.remaining()).apply { byteBuffer.get(this) }
+-    val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+-    val matrix = Matrix()
+     matrix.preScale(-1f, 1f)
+-    val processedBitmap =
+-      Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, false)
+-    FileOutputStream(file).use { stream ->
+-      processedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+-    }
+-  } else {
+-    val channel = FileOutputStream(file).channel
+-    channel.write(byteBuffer)
+-    channel.close()
+   }
++
++  val processedBitmap =
++    Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, false)
++  FileOutputStream(file).use { stream ->
++    processedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
++  }
++
++  val exif = ExifInterface(file.absolutePath)
++  exif.setAttribute(ExifInterface.TAG_IMAGE_WIDTH, bitmap.width.toString())
++  exif.setAttribute(ExifInterface.TAG_IMAGE_LENGTH, bitmap.height.toString())
+ }
+ 
+ private suspend fun savePhotoToFile(
+diff --git a/android/src/main/java/com/mrousavy/camera/CameraViewModule.kt b/android/src/main/java/com/mrousavy/camera/CameraViewModule.kt
+index 9b9d909a5c83d4c61b0834834bd0409bf5e9ece3..b8589d24f534ba4e680bd371f8831fc28431cb2a 100644
+--- a/android/src/main/java/com/mrousavy/camera/CameraViewModule.kt
++++ b/android/src/main/java/com/mrousavy/camera/CameraViewModule.kt
+@@ -2,6 +2,7 @@ package com.mrousavy.camera
+ 
+ import android.Manifest
+ import android.content.pm.PackageManager
++import android.net.Uri
+ import android.util.Log
+ import androidx.core.content.ContextCompat
+ import com.facebook.react.bridge.*
+@@ -9,8 +10,12 @@ import com.facebook.react.module.annotations.ReactModule
+ import com.facebook.react.modules.core.PermissionAwareActivity
+ import com.facebook.react.modules.core.PermissionListener
+ import com.facebook.react.uimanager.UIManagerHelper
++import com.google.mlkit.vision.barcode.BarcodeScannerOptions
++import com.google.mlkit.vision.barcode.BarcodeScanning
++import com.google.mlkit.vision.common.InputImage
+ import com.mrousavy.camera.core.CameraError
+ import com.mrousavy.camera.core.CameraQueues
++import com.mrousavy.camera.core.UnknownCameraError
+ import com.mrousavy.camera.core.ViewNotFoundError
+ import com.mrousavy.camera.frameprocessor.VisionCameraInstaller
+ import com.mrousavy.camera.frameprocessor.VisionCameraProxy
+@@ -220,4 +225,67 @@ class CameraViewModule(reactContext: ReactApplicationContext) : ReactContextBase
+       promise.reject("NO_ACTIVITY", "No PermissionAwareActivity was found! Make sure the app has launched before calling this function.")
+     }
+   }
++
++  @ReactMethod
++  fun scanCode(fileUrl: String, options: ReadableMap, promise: Promise) {
++    try {
++      val codeTypes = CodeScannerOptions.fromJSValue(options).codeTypes
++      val types = codeTypes.map { it.toBarcodeType() }
++      val uri = Uri.parse(fileUrl)
++      val inputImage = InputImage.fromFilePath(reactApplicationContext, uri)
++      val scannerOptions = BarcodeScannerOptions.Builder()
++        .setBarcodeFormats(types[0], *types.toIntArray())
++        .build()
++      val scanner = BarcodeScanning.getClient(scannerOptions)
++
++      scanner.process(inputImage)
++        .addOnSuccessListener { barcodes ->
++          scanner.close();
++          val codes = Arguments.createArray()
++          barcodes.forEach { barcode ->
++            val code = Arguments.createMap()
++            val type = CodeType.fromBarcodeType(barcode.format)
++            code.putString("type", type.unionValue)
++            code.putString("value", barcode.rawValue)
++
++            barcode.boundingBox?.let { rect ->
++              val frame = Arguments.createMap()
++              frame.putInt("x", rect.left)
++              frame.putInt("y", rect.top)
++              frame.putInt("width", rect.right - rect.left)
++              frame.putInt("height", rect.bottom - rect.top)
++              code.putMap("frame", frame)
++            }
++
++            barcode.cornerPoints?.let { points ->
++              val corners = Arguments.createArray()
++              points.forEach { point ->
++                val pt = Arguments.createMap()
++                pt.putInt("x", point.x)
++                pt.putInt("y", point.y)
++                corners.pushMap(pt)
++              }
++              code.putArray("corners", corners)
++            }
++            codes.pushMap(code)
++          }
++
++          // TODO: do something with this?
++          // val codeScannerFrame = Arguments.createMap()
++          // codeScannerFrame.putInt("width", inputImage.width)
++          // codeScannerFrame.putInt("height", inputImage.height)
++
++          promise.resolve(codes)
++        }
++        .addOnFailureListener { e ->
++          scanner.close();
++          val error = UnknownCameraError(e)
++          promise.reject("${error.domain}/${error.id}", error.message, error.cause)
++        }
++    } catch (e: Throwable) {
++      e.printStackTrace()
++      val error = if (e is CameraError) e else UnknownCameraError(e)
++      promise.reject("${error.domain}/${error.id}", error.message, error.cause)
++    }
++  }
+ }
+diff --git a/android/src/main/java/com/mrousavy/camera/core/CameraSession.kt b/android/src/main/java/com/mrousavy/camera/core/CameraSession.kt
+index 747270b4f5b5c6d9b36a735125b1681c72a94c83..34eb1e4347006d476a1aec7aeac7dd7f50858bf3 100644
+--- a/android/src/main/java/com/mrousavy/camera/core/CameraSession.kt
++++ b/android/src/main/java/com/mrousavy/camera/core/CameraSession.kt
+@@ -380,7 +380,6 @@ class CameraSession(private val context: Context, private val cameraManager: Cam
+       flash,
+       enableAutoStabilization,
+       photoOutput.enableHdr,
+-      outputOrientation,
+       enableShutterSound,
+       enablePrecapture
+     )
+@@ -393,7 +392,8 @@ class CameraSession(private val context: Context, private val cameraManager: Cam
+       Log.i(TAG, "Photo capture 3/3 - received ${image.width} x ${image.height} image, preparing result...")
+       val deviceDetails = captureSession.getActiveDeviceDetails()
+       val isMirrored = deviceDetails?.lensFacing == LensFacing.FRONT
+-      return CapturedPhoto(image, result, orientation, isMirrored, image.format)
++      val imageOrientation = if (deviceDetails != null) outputOrientation.toSensorRelativeOrientation(deviceDetails) else Orientation.PORTRAIT
++      return CapturedPhoto(image, result, orientation, isMirrored, image.format, imageOrientation)
+     } catch (e: CancellationException) {
+       throw CaptureAbortedError(false)
+     }
+@@ -480,7 +480,8 @@ class CameraSession(private val context: Context, private val cameraManager: Cam
+     val metadata: TotalCaptureResult,
+     val orientation: Orientation,
+     val isMirrored: Boolean,
+-    val format: Int
++    val format: Int,
++    val imageOrientation: Orientation
+   ) : Closeable {
+     override fun close() {
+       image.close()
+diff --git a/android/src/main/java/com/mrousavy/camera/core/PersistentCameraCaptureSession.kt b/android/src/main/java/com/mrousavy/camera/core/PersistentCameraCaptureSession.kt
+index 3bb1c158199a678b2e4c677e6d044f37be855455..7032f950ec0d362309edf371faeacae2860f7365 100644
+--- a/android/src/main/java/com/mrousavy/camera/core/PersistentCameraCaptureSession.kt
++++ b/android/src/main/java/com/mrousavy/camera/core/PersistentCameraCaptureSession.kt
+@@ -21,7 +21,6 @@ import com.mrousavy.camera.extensions.precapture
+ import com.mrousavy.camera.extensions.tryAbortCaptures
+ import com.mrousavy.camera.extensions.tryStopRepeating
+ import com.mrousavy.camera.types.Flash
+-import com.mrousavy.camera.types.Orientation
+ import com.mrousavy.camera.types.QualityPrioritization
+ import java.io.Closeable
+ import kotlinx.coroutines.CoroutineScope
+@@ -144,7 +143,6 @@ class PersistentCameraCaptureSession(private val cameraManager: CameraManager, p
+     flash: Flash,
+     enableAutoStabilization: Boolean,
+     enablePhotoHdr: Boolean,
+-    orientation: Orientation,
+     enableShutterSound: Boolean,
+     enablePrecapture: Boolean
+   ): TotalCaptureResult {
+@@ -160,8 +158,7 @@ class PersistentCameraCaptureSession(private val cameraManager: CameraManager, p
+         repeatingRequest,
+         qualityPrioritization,
+         enableAutoStabilization,
+-        enablePhotoHdr,
+-        orientation
++        enablePhotoHdr
+       )
+       val device = session.device
+       val deviceDetails = getOrCreateCameraDeviceDetails(device)
+diff --git a/android/src/main/java/com/mrousavy/camera/core/capture/PhotoCaptureRequest.kt b/android/src/main/java/com/mrousavy/camera/core/capture/PhotoCaptureRequest.kt
+index 03ca3de61a00c17b2a39f688443f956464a7b2f3..eca165d8c699ecf022e5874809bfd1608e904aec 100644
+--- a/android/src/main/java/com/mrousavy/camera/core/capture/PhotoCaptureRequest.kt
++++ b/android/src/main/java/com/mrousavy/camera/core/capture/PhotoCaptureRequest.kt
+@@ -16,8 +16,7 @@ class PhotoCaptureRequest(
+   repeatingRequest: RepeatingCaptureRequest,
+   private val qualityPrioritization: QualityPrioritization,
+   private val enableAutoStabilization: Boolean,
+-  enablePhotoHdr: Boolean,
+-  private val outputOrientation: Orientation
++  enablePhotoHdr: Boolean
+ ) : CameraCaptureRequest(
+   Torch.OFF,
+   enablePhotoHdr,
+@@ -131,10 +130,6 @@ class PhotoCaptureRequest(
+       }
+     }
+ 
+-    // Set JPEG Orientation
+-    val targetOrientation = outputOrientation.toSensorRelativeOrientation(deviceDetails)
+-    builder.set(CaptureRequest.JPEG_ORIENTATION, targetOrientation.toDegrees())
+-
+     // Set stabilization for this Frame
+     if (enableAutoStabilization) {
+       if (deviceDetails.opticalStabilizationModes.contains(CameraCharacteristics.LENS_OPTICAL_STABILIZATION_MODE_ON)) {
+diff --git a/android/src/main/java/com/mrousavy/camera/types/Orientation.kt b/android/src/main/java/com/mrousavy/camera/types/Orientation.kt
+index 64dc5bcf78140a4da9eb113d217e6e4781d01600..f15779502b4c8a069ea3e3b571c5a0c9dcb0c825 100644
+--- a/android/src/main/java/com/mrousavy/camera/types/Orientation.kt
++++ b/android/src/main/java/com/mrousavy/camera/types/Orientation.kt
+@@ -18,16 +18,22 @@ enum class Orientation(override val unionValue: String) : JSUnionValue {
+ 
+   fun toSensorRelativeOrientation(deviceDetails: CameraDeviceDetails): Orientation {
+     // Convert target orientation to rotation degrees (0, 90, 180, 270)
+-    var rotationDegrees = this.toDegrees()
++    val rotationDegrees = this.toDegrees()
+ 
+     // Reverse device orientation for front-facing cameras
+-    if (deviceDetails.lensFacing == LensFacing.FRONT) {
+-      rotationDegrees = -rotationDegrees
++    val isFrontCam = deviceDetails.lensFacing == LensFacing.FRONT
++    val sensorOrientation = deviceDetails.sensorOrientation.toDegrees().let { if (isFrontCam) 360 - it else it }
++
++    // Love this: https://medium.com/@kenodoggy/solving-image-rotation-on-android-using-camera2-api-7b3ed3518ab6
++    val surfaceRotation = when (rotationDegrees) {
++      90 -> 0
++      180 -> 270
++      270 -> 180
++      else -> 90
+     }
+ 
+     // Rotate sensor rotation by target rotation
+-    val newRotationDegrees = (deviceDetails.sensorOrientation.toDegrees() + rotationDegrees + 360) % 360
+-
++    val newRotationDegrees = (surfaceRotation + sensorOrientation + 270) % 360
+     return fromRotationDegrees(newRotationDegrees)
+   }
+ 
+diff --git a/ios/CameraViewManager.m b/ios/CameraViewManager.m
+index fa2e9caa2cf79bead95d19e02fcdb3dea91bad24..a9e3324296afc2d4f6667911cb37b9d622fba20a 100644
+--- a/ios/CameraViewManager.m
++++ b/ios/CameraViewManager.m
+@@ -18,6 +18,11 @@ RCT_EXTERN__BLOCKING_SYNCHRONOUS_METHOD(getCameraPermissionStatus);
+ RCT_EXTERN__BLOCKING_SYNCHRONOUS_METHOD(getMicrophonePermissionStatus);
+ RCT_EXTERN_METHOD(requestCameraPermission : (RCTPromiseResolveBlock)resolve reject : (RCTPromiseRejectBlock)reject);
+ RCT_EXTERN_METHOD(requestMicrophonePermission : (RCTPromiseResolveBlock)resolve reject : (RCTPromiseRejectBlock)reject);
++RCT_EXTERN_METHOD(scanCode
++                  : (NSString*)fileUrl options
++                  : (NSDictionary*)options resolve
++                  : (RCTPromiseResolveBlock)resolve reject
++                  : (RCTPromiseRejectBlock)reject);
+ 
+ RCT_EXTERN__BLOCKING_SYNCHRONOUS_METHOD(installFrameProcessorBindings);
+ 
+diff --git a/ios/CameraViewManager.swift b/ios/CameraViewManager.swift
+index 437f3258c1a7bc930a5c24d89b3139bac162682e..6884b92557037f4c07269bc7da3034425ae2b6a6 100644
+--- a/ios/CameraViewManager.swift
++++ b/ios/CameraViewManager.swift
+@@ -8,6 +8,7 @@
+ 
+ import AVFoundation
+ import Foundation
++import Vision
+ 
+ @objc(CameraViewManager)
+ final class CameraViewManager: RCTViewManager {
+@@ -110,7 +111,74 @@ final class CameraViewManager: RCTViewManager {
+       resolve(result.descriptor)
+     }
+   }
+-
++    
++  @objc
++  final func scanCode(_ fileUrl: String, options: NSDictionary, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
++    let promise = Promise(resolver: resolve, rejecter: reject)
++    do {
++      let fileUrlObj = URL(fileURLWithPath: fileUrl.replacingOccurrences(of: "file://", with: ""))
++      let codeScannerOptions = try CodeScannerOptions(fromJsValue: options)
++      
++      var vnBarCodeDetectionRequest: VNDetectBarcodesRequest {
++        let request = VNDetectBarcodesRequest {(request, error) in
++          if let error = error as NSError? {
++            promise.reject(error: .unknown(cause: error))
++            return
++          }
++          
++          guard let observations = request.results as? [VNBarcodeObservation] else {
++            promise.reject(error: .unknown(message: "Error when scanning code"))
++            return
++          }
++          
++          do {
++            let codes = try observations.map { observation in
++              let type = try AVMetadataObject.ObjectType(withString: observation.symbology.descriptor)
++              let corners = [observation.topLeft, observation.topRight, observation.bottomRight, observation.bottomLeft]
++                return CameraSession.Code(type: type, value: observation.payloadStringValue, frame: observation.boundingBox, corners: corners).toJSValue()
++            }
++            promise.resolve(codes)
++          } catch let error {
++            if let cameraError = error as? CameraError {
++              promise.reject(error: cameraError)
++            } else {
++              promise.reject(error: .unknown(cause: error as NSError))
++            }
++          }
++        }
++        return request
++      }
++
++      if #available(iOS 15.0, *) {
++        let supportedCodeTypes = try vnBarCodeDetectionRequest.supportedSymbologies()
++        for type in codeScannerOptions.vnCodeTypes {
++          if !supportedCodeTypes.contains(type) {
++            throw CameraError.codeScanner(.codeTypeNotSupported(codeType: type.descriptor))
++          }
++        }
++      }
++      vnBarCodeDetectionRequest.symbologies = codeScannerOptions.vnCodeTypes
++      if let regionOfInterest = codeScannerOptions.regionOfInterest {
++        vnBarCodeDetectionRequest.regionOfInterest = regionOfInterest
++      }
++
++      let requestHandler = VNImageRequestHandler(url: fileUrlObj, options: [:])
++      let vnRequests = [vnBarCodeDetectionRequest]
++      DispatchQueue.global(qos: .background).async {
++        do {
++          try requestHandler.perform(vnRequests)
++        } catch let error as NSError {
++          promise.reject(error: .unknown(cause: error))
++        }
++      }
++    } catch let error {
++      if let cameraError = error as? CameraError {
++        promise.reject(error: cameraError)
++      } else {
++        promise.reject(error: .unknown(cause: error as NSError))
++      }
++    }
++  }
+   // MARK: Private
+ 
+   private func getCameraView(withTag tag: NSNumber) -> CameraView {
+diff --git a/ios/Core/CameraSession+Photo.swift b/ios/Core/CameraSession+Photo.swift
+index 500a0121a2f90591e5b9d9b665ab5ef8d4843627..b221569f9d2ef7be0cf146a3d5a57704e106a6fe 100644
+--- a/ios/Core/CameraSession+Photo.swift
++++ b/ios/Core/CameraSession+Photo.swift
+@@ -98,7 +98,7 @@ extension CameraSession {
+       }
+ 
+       // Actually do the capture!
+-      photoOutput.capturePhoto(with: photoSettings, delegate: PhotoCaptureDelegate(promise: promise, enableShutterSound: enableShutterSound))
++      photoOutput.capturePhoto(with: photoSettings, delegate: PhotoCaptureDelegate(promise: promise, enableShutterSound: enableShutterSound, orientation: self.configuration?.orientation ?? .portrait))
+ 
+       // Assume that `takePhoto` is always called with the same parameters, so prepare the next call too.
+       photoOutput.setPreparedPhotoSettingsArray([photoSettings], completionHandler: nil)
+diff --git a/ios/Core/PhotoCaptureDelegate.swift b/ios/Core/PhotoCaptureDelegate.swift
+index 7416bb95410a1af80604d4420b14deca9b1548f6..7bda2c69051ff2a61bb5c2e9745bf086762df2e2 100644
+--- a/ios/Core/PhotoCaptureDelegate.swift
++++ b/ios/Core/PhotoCaptureDelegate.swift
+@@ -16,10 +16,12 @@ private var delegatesReferences: [NSObject] = []
+ class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
+   private let promise: Promise
+   private let enableShutterSound: Bool
++  private let orientation: Orientation
+ 
+-  required init(promise: Promise, enableShutterSound: Bool) {
++  required init(promise: Promise, enableShutterSound: Bool, orientation: Orientation) {
+     self.promise = promise
+     self.enableShutterSound = enableShutterSound
++    self.orientation = orientation
+     super.init()
+     delegatesReferences.append(self)
+   }
+@@ -57,18 +59,21 @@ class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
+     do {
+       try data.write(to: url)
+       let exif = photo.metadata["{Exif}"] as? [String: Any]
+-      let width = exif?["PixelXDimension"]
+-      let height = exif?["PixelYDimension"]
+       let exifOrientation = photo.metadata[String(kCGImagePropertyOrientation)] as? UInt32 ?? CGImagePropertyOrientation.up.rawValue
+       let cgOrientation = CGImagePropertyOrientation(rawValue: exifOrientation) ?? CGImagePropertyOrientation.up
+-      let orientation = getOrientation(forExifOrientation: cgOrientation)
+       let isMirrored = getIsMirrored(forExifOrientation: cgOrientation)
+-
++      var width = exif?["PixelXDimension"]
++      var height = exif?["PixelYDimension"]
++        
++      if (Int(abs(self.orientation.toDegrees() - getOrientationDegrees(forExifOrientation: cgOrientation)) / 90) % 2 == 1) {
++        (width, height) = (height, width)
++      }
++        
+       promise.resolve([
+         "path": tempFilePath,
+         "width": width as Any,
+         "height": height as Any,
+-        "orientation": orientation,
++        "orientation": self.orientation.jsValue,
+         "isMirrored": isMirrored,
+         "isRawPhoto": photo.isRawPhoto,
+         "metadata": photo.metadata,
+@@ -93,18 +98,18 @@ class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
+     }
+   }
+ 
+-  private func getOrientation(forExifOrientation exifOrientation: CGImagePropertyOrientation) -> String {
++  private func getOrientationDegrees(forExifOrientation exifOrientation: CGImagePropertyOrientation) -> Double {
+     switch exifOrientation {
+     case .up, .upMirrored:
+-      return "portrait"
++      return 0
+     case .down, .downMirrored:
+-      return "portrait-upside-down"
++      return 180
+     case .left, .leftMirrored:
+-      return "landscape-left"
++      return 90
+     case .right, .rightMirrored:
+-      return "landscape-right"
++      return 270
+     default:
+-      return "portrait"
++      return 0
+     }
+   }
+ 
+diff --git a/ios/Parsers/AVMetadataObject.ObjectType+descriptor.swift b/ios/Parsers/AVMetadataObject.ObjectType+descriptor.swift
+index e74838b56ac2236002478eb01fc36412df6f6692..66347d0a494394521684b8249e9cb972dc3413c7 100644
+--- a/ios/Parsers/AVMetadataObject.ObjectType+descriptor.swift
++++ b/ios/Parsers/AVMetadataObject.ObjectType+descriptor.swift
+@@ -8,6 +8,7 @@
+ 
+ import AVFoundation
+ import Foundation
++import Vision
+ 
+ extension AVMetadataObject.ObjectType {
+   init(withString string: String) throws {
+@@ -92,3 +93,87 @@ extension AVMetadataObject.ObjectType {
+     }
+   }
+ }
++
++extension VNBarcodeSymbology {
++  init(withString string: String) throws {
++    switch string {
++    case "code-128":
++      self = .code128
++      return
++    case "code-39":
++      self = .code39
++      return
++    case "code-93":
++      self = .code93
++      return
++    case "codabar":
++      if #available(iOS 15.0, *) {
++        self = .codabar
++      } else {
++        throw CameraError.codeScanner(.codeTypeNotSupported(codeType: string))
++      }
++      return
++    case "ean-13":
++      self = .ean13
++      return
++    case "ean-8":
++      self = .ean8
++      return
++    case "itf":
++      self = .itf14
++      return
++    case "upc-e":
++      self = .upce
++      return
++    case "qr":
++      self = .qr
++      return
++    case "pdf-417":
++      self = .pdf417
++      return
++    case "aztec":
++      self = .aztec
++      return
++    case "data-matrix":
++      self = .dataMatrix
++      return
++    default:
++      throw EnumParserError.invalidValue
++    }
++  }
++
++  var descriptor: String {
++    if #available(iOS 15.0, *) {
++      if self == .codabar {
++        return "codabar"
++      }
++    }
++
++    switch self {
++    case .code128:
++      return "code-128"
++    case .code39:
++      return "code-39"
++    case .code93:
++      return "code-93"
++    case .ean13:
++      return "ean-13"
++    case .ean8:
++      return "ean-8"
++    case .itf14:
++      return "itf"
++    case .upce:
++      return "upce"
++    case .qr:
++      return "qr"
++    case .pdf417:
++      return "pdf-417"
++    case .aztec:
++      return "aztec"
++    case .dataMatrix:
++      return "data-matrix"
++    default:
++      return "unknown"
++    }
++  }
++}
+diff --git a/ios/Types/CodeScannerOptions.swift b/ios/Types/CodeScannerOptions.swift
+index 92993d05fad083a16fb402826c8df88e12eff9e6..7ebe93c168e168fff4e6f40491e10c788e2742d6 100644
+--- a/ios/Types/CodeScannerOptions.swift
++++ b/ios/Types/CodeScannerOptions.swift
+@@ -8,9 +8,11 @@
+ 
+ import AVFoundation
+ import Foundation
++import Vision
+ 
+ struct CodeScannerOptions: Equatable {
+   let codeTypes: [AVMetadataObject.ObjectType]
++  let vnCodeTypes: [VNBarcodeSymbology]
+   let interval: Int
+   let regionOfInterest: CGRect?
+ 
+@@ -19,6 +21,9 @@ struct CodeScannerOptions: Equatable {
+       self.codeTypes = try codeTypes.map { value in
+         return try AVMetadataObject.ObjectType(withString: value)
+       }
++      self.vnCodeTypes = try codeTypes.map { value in
++        return try VNBarcodeSymbology(withString: value)
++      }
+     } else {
+       throw CameraError.parameter(.invalidCombination(provided: "codeScanner", missing: "codeTypes"))
+     }
+diff --git a/lib/commonjs/Camera.js b/lib/commonjs/Camera.js
+index d87c4edd89c66c9f462db5e046901530f61d4fd1..03bfdef41d1c8c50c48dd819b7a931d80dd1761e 100644
+--- a/lib/commonjs/Camera.js
++++ b/lib/commonjs/Camera.js
+@@ -347,6 +347,16 @@ class Camera extends _react.default.PureComponent {
+       throw (0, _CameraError.tryParseNativeCameraError)(e);
+     }
+   }
++  /**
++   * Scan code from local image.
++   */
++  static async scanCode(fileUrl, config) {
++    try {
++      return await _NativeCameraModule.CameraModule.scanCode(fileUrl, config);
++    } catch (e) {
++      throw (0, _CameraError.tryParseNativeCameraError)(e);
++    }
++  }
+   //#endregion
+ 
+   //#region Events (Wrapped to maintain reference equality)
+diff --git a/lib/commonjs/Camera.js.map b/lib/commonjs/Camera.js.map
+index 583be55234f609b5a980da8549b0ff99764c3203..c907557e47b3fae67de31d2bd43d3b66902a9d3d 100644
+--- a/lib/commonjs/Camera.js.map
++++ b/lib/commonjs/Camera.js.map
+@@ -1 +1 @@
+-{"version":3,"names":["_react","_interopRequireDefault","require","_reactNative","_CameraError","_NativeCameraModule","_FrameProcessorPlugins","_CameraDevices","obj","__esModule","default","_extends","Object","assign","bind","target","i","arguments","length","source","key","prototype","hasOwnProperty","call","apply","Camera","React","PureComponent","displayName","isNativeViewMounted","constructor","props","onViewReady","onInitialized","onStarted","onStopped","onError","onCodeScanned","ref","createRef","lastFrameProcessor","undefined","state","isRecordingWithFlash","handle","nodeHandle","findNodeHandle","current","CameraRuntimeError","takePhoto","options","CameraModule","e","tryParseNativeCameraError","getBitRateMultiplier","bitRate","startRecording","onRecordingError","onRecordingFinished","videoBitRate","passThruOptions","flash","setState","nativeOptions","videoBitRateOverride","videoBitRateMultiplier","onRecordCallback","video","error","pauseRecording","resumeRecording","stopRecording","focus","point","getAvailableCameraDevices","CameraDevices","addCameraDevicesChangedListener","listener","getCameraPermissionStatus","getMicrophonePermissionStatus","requestCameraPermission","requestMicrophonePermission","event","nativeEvent","cause","isErrorWithCause","cameraError","code","message","console","_this$props$onInitial","_this$props","_this$props$onStarted","_this$props2","_this$props$onStopped","_this$props3","codeScanner","codes","frame","setFrameProcessor","frameProcessor","VisionCameraProxy","unsetFrameProcessor","removeFrameProcessor","componentDidUpdate","render","device","shouldEnableBufferCompression","pixelFormat","torch","createElement","NativeCameraView","cameraId","id","codeScannerOptions","enableFrameProcessor","enableBufferCompression","exports","requireNativeComponent"],"sourceRoot":"../../src","sources":["Camera.tsx"],"mappings":"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"}
+\ No newline at end of file
++{"version":3,"names":["_react","_interopRequireDefault","require","_reactNative","_CameraError","_NativeCameraModule","_FrameProcessorPlugins","_CameraDevices","obj","__esModule","default","_extends","Object","assign","bind","target","i","arguments","length","source","key","prototype","hasOwnProperty","call","apply","Camera","React","PureComponent","displayName","isNativeViewMounted","constructor","props","onViewReady","onInitialized","onStarted","onStopped","onError","onCodeScanned","ref","createRef","lastFrameProcessor","undefined","state","isRecordingWithFlash","handle","nodeHandle","findNodeHandle","current","CameraRuntimeError","takePhoto","options","CameraModule","e","tryParseNativeCameraError","getBitRateMultiplier","bitRate","startRecording","onRecordingError","onRecordingFinished","videoBitRate","passThruOptions","flash","setState","nativeOptions","videoBitRateOverride","videoBitRateMultiplier","onRecordCallback","video","error","pauseRecording","resumeRecording","stopRecording","focus","point","getAvailableCameraDevices","CameraDevices","addCameraDevicesChangedListener","listener","getCameraPermissionStatus","getMicrophonePermissionStatus","requestCameraPermission","requestMicrophonePermission","scanCode","fileUrl","config","event","nativeEvent","cause","isErrorWithCause","cameraError","code","message","console","_this$props$onInitial","_this$props","_this$props$onStarted","_this$props2","_this$props$onStopped","_this$props3","codeScanner","codes","frame","setFrameProcessor","frameProcessor","VisionCameraProxy","unsetFrameProcessor","removeFrameProcessor","componentDidUpdate","render","device","shouldEnableBufferCompression","pixelFormat","torch","createElement","NativeCameraView","cameraId","id","codeScannerOptions","enableFrameProcessor","enableBufferCompression","exports","requireNativeComponent"],"sourceRoot":"../../src","sources":["Camera.tsx"],"mappings":"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"}
+\ No newline at end of file
+diff --git a/lib/module/Camera.js b/lib/module/Camera.js
+index e600cb873ae28df82ebbb38a1ebebd7cb5bcedf0..a4879fc9765edc413c809ca1a6d5df15adc0d112 100644
+--- a/lib/module/Camera.js
++++ b/lib/module/Camera.js
+@@ -341,6 +341,16 @@ export class Camera extends React.PureComponent {
+       throw tryParseNativeCameraError(e);
+     }
+   }
++  /**
++   * Scan code from local image.
++   */
++  static async scanCode(fileUrl, config) {
++    try {
++      return await CameraModule.scanCode(fileUrl, config);
++    } catch (e) {
++      throw tryParseNativeCameraError(e);
++    }
++  }
+   //#endregion
+ 
+   //#region Events (Wrapped to maintain reference equality)
+diff --git a/lib/module/Camera.js.map b/lib/module/Camera.js.map
+index 6e29c3f3774f300da1b344d0b2f0903f1c417bca..f25bede3dc72182bb06f06c23fd65e9f8f03ad0f 100644
+--- a/lib/module/Camera.js.map
++++ b/lib/module/Camera.js.map
+@@ -1 +1 @@
+-{"version":3,"names":["React","requireNativeComponent","findNodeHandle","CameraRuntimeError","tryParseNativeCameraError","isErrorWithCause","CameraModule","VisionCameraProxy","CameraDevices","Camera","PureComponent","displayName","isNativeViewMounted","constructor","props","onViewReady","bind","onInitialized","onStarted","onStopped","onError","onCodeScanned","ref","createRef","lastFrameProcessor","undefined","state","isRecordingWithFlash","handle","nodeHandle","current","takePhoto","options","e","getBitRateMultiplier","bitRate","startRecording","onRecordingError","onRecordingFinished","videoBitRate","passThruOptions","flash","setState","nativeOptions","videoBitRateOverride","videoBitRateMultiplier","onRecordCallback","video","error","pauseRecording","resumeRecording","stopRecording","focus","point","getAvailableCameraDevices","addCameraDevicesChangedListener","listener","getCameraPermissionStatus","getMicrophonePermissionStatus","requestCameraPermission","requestMicrophonePermission","event","nativeEvent","cause","cameraError","code","message","console","_this$props$onInitial","_this$props","call","_this$props$onStarted","_this$props2","_this$props$onStopped","_this$props3","codeScanner","codes","frame","setFrameProcessor","frameProcessor","unsetFrameProcessor","removeFrameProcessor","componentDidUpdate","render","device","shouldEnableBufferCompression","pixelFormat","torch","createElement","NativeCameraView","_extends","cameraId","id","codeScannerOptions","enableFrameProcessor","enableBufferCompression"],"sourceRoot":"../../src","sources":["Camera.tsx"],"mappings":"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"}
+\ No newline at end of file
++{"version":3,"names":["React","requireNativeComponent","findNodeHandle","CameraRuntimeError","tryParseNativeCameraError","isErrorWithCause","CameraModule","VisionCameraProxy","CameraDevices","Camera","PureComponent","displayName","isNativeViewMounted","constructor","props","onViewReady","bind","onInitialized","onStarted","onStopped","onError","onCodeScanned","ref","createRef","lastFrameProcessor","undefined","state","isRecordingWithFlash","handle","nodeHandle","current","takePhoto","options","e","getBitRateMultiplier","bitRate","startRecording","onRecordingError","onRecordingFinished","videoBitRate","passThruOptions","flash","setState","nativeOptions","videoBitRateOverride","videoBitRateMultiplier","onRecordCallback","video","error","pauseRecording","resumeRecording","stopRecording","focus","point","getAvailableCameraDevices","addCameraDevicesChangedListener","listener","getCameraPermissionStatus","getMicrophonePermissionStatus","requestCameraPermission","requestMicrophonePermission","scanCode","fileUrl","config","event","nativeEvent","cause","cameraError","code","message","console","_this$props$onInitial","_this$props","call","_this$props$onStarted","_this$props2","_this$props$onStopped","_this$props3","codeScanner","codes","frame","setFrameProcessor","frameProcessor","unsetFrameProcessor","removeFrameProcessor","componentDidUpdate","render","device","shouldEnableBufferCompression","pixelFormat","torch","createElement","NativeCameraView","_extends","cameraId","id","codeScannerOptions","enableFrameProcessor","enableBufferCompression"],"sourceRoot":"../../src","sources":["Camera.tsx"],"mappings":"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"}
+\ No newline at end of file
+diff --git a/lib/typescript/Camera.d.ts b/lib/typescript/Camera.d.ts
+index c623b819ae59919409b00544898f296f7f7f0cff..68098f94c1d48edaa92bbc4e24f23c1698efc535 100644
+--- a/lib/typescript/Camera.d.ts
++++ b/lib/typescript/Camera.d.ts
+@@ -5,6 +5,7 @@ import type { PhotoFile, TakePhotoOptions } from './PhotoFile';
+ import type { Point } from './Point';
+ import type { RecordVideoOptions } from './VideoFile';
+ import type { EmitterSubscription } from 'react-native';
++import type { Code, CodeScanner } from './CodeScanner';
+ export type CameraPermissionStatus = 'granted' | 'not-determined' | 'denied' | 'restricted';
+ export type CameraPermissionRequestResult = 'granted' | 'denied';
+ interface CameraState {
+@@ -211,6 +212,10 @@ export declare class Camera extends React.PureComponent<CameraProps, CameraState
+      * @throws {@linkcode CameraRuntimeError} When any kind of error occured while requesting permission. Use the {@linkcode CameraRuntimeError.code | code} property to get the actual error
+      */
+     static requestMicrophonePermission(): Promise<CameraPermissionRequestResult>;
++    /**
++     * Scan code from local image.
++     */
++    static scanCode(fileUrl: string, config: Omit<CodeScanner, 'onCodeScanned'>): Promise<Code[]>;
+     private onError;
+     private onInitialized;
+     private onStarted;
+diff --git a/lib/typescript/Camera.d.ts.map b/lib/typescript/Camera.d.ts.map
+index 846484937f2dface07393b4346e36fc2176e0890..cf565c204531f892c8fee543e06937a503e594d0 100644
+--- a/lib/typescript/Camera.d.ts.map
++++ b/lib/typescript/Camera.d.ts.map
+@@ -1 +1 @@
+-{"version":3,"file":"Camera.d.ts","sourceRoot":"","sources":["../../src/Camera.tsx"],"names":[],"mappings":"AAAA,OAAO,KAAK,MAAM,OAAO,CAAA;AAEzB,OAAO,KAAK,EAAE,YAAY,EAAE,MAAM,gBAAgB,CAAA;AAGlD,OAAO,KAAK,EAAE,WAAW,EAAkB,MAAM,eAAe,CAAA;AAEhE,OAAO,KAAK,EAAE,SAAS,EAAE,gBAAgB,EAAE,MAAM,aAAa,CAAA;AAC9D,OAAO,KAAK,EAAE,KAAK,EAAE,MAAM,SAAS,CAAA;AACpC,OAAO,KAAK,EAAE,kBAAkB,EAAa,MAAM,aAAa,CAAA;AAGhE,OAAO,KAAK,EAAE,mBAAmB,EAAE,MAAM,cAAc,CAAA;AAIvD,MAAM,MAAM,sBAAsB,GAAG,SAAS,GAAG,gBAAgB,GAAG,QAAQ,GAAG,YAAY,CAAA;AAC3F,MAAM,MAAM,6BAA6B,GAAG,SAAS,GAAG,QAAQ,CAAA;AA2BhE,UAAU,WAAW;IACnB,oBAAoB,EAAE,OAAO,CAAA;CAC9B;AAID;;;;;;;;;;;;;;;;;;;;;;;;;;;GA2BG;AACH,qBAAa,MAAO,SAAQ,KAAK,CAAC,aAAa,CAAC,WAAW,EAAE,WAAW,CAAC;IACvE,gBAAgB;IAChB,MAAM,CAAC,WAAW,SAAW;IAC7B,gBAAgB;IAChB,WAAW,SAAqB;IAChC,OAAO,CAAC,kBAAkB,CAA4B;IACtD,OAAO,CAAC,mBAAmB,CAAQ;IAEnC,OAAO,CAAC,QAAQ,CAAC,GAAG,CAA0B;IAE9C,gBAAgB;gBACJ,KAAK,EAAE,WAAW;IAe9B,OAAO,KAAK,MAAM,GAUjB;IAGD;;;;;;;;;;;;OAYG;IACU,SAAS,CAAC,OAAO,CAAC,EAAE,gBAAgB,GAAG,OAAO,CAAC,SAAS,CAAC;IAQtE,OAAO,CAAC,oBAAoB;IAgB5B;;;;;;;;;;;;;;;OAeG;IACI,cAAc,CAAC,OAAO,EAAE,kBAAkB,GAAG,IAAI;IAwCxD;;;;;;;;;;;;;;;;;;;OAmBG;IACU,cAAc,IAAI,OAAO,CAAC,IAAI,CAAC;IAQ5C;;;;;;;;;;;;;;;;;;;OAmBG;IACU,eAAe,IAAI,OAAO,CAAC,IAAI,CAAC;IAQ7C;;;;;;;;;;;;OAYG;IACU,aAAa,IAAI,OAAO,CAAC,IAAI,CAAC;IAQ3C;;;;;;;;;;;;;;;;;OAiBG;IACU,KAAK,CAAC,KAAK,EAAE,KAAK,GAAG,OAAO,CAAC,IAAI,CAAC;IAU/C;;;;;;;;;;;;;;OAcG;WACW,yBAAyB,IAAI,YAAY,EAAE;IAGzD;;;;;OAKG;WACW,+BAA+B,CAAC,QAAQ,EAAE,CAAC,UAAU,EAAE,YAAY,EAAE,KAAK,IAAI,GAAG,mBAAmB;IAGlH;;;;;OAKG;WACW,yBAAyB,IAAI,sBAAsB;IAGjE;;;;;OAKG;WACW,6BAA6B,IAAI,sBAAsB;IAGrE;;;;;;;OAOG;WACiB,uBAAuB,IAAI,OAAO,CAAC,6BAA6B,CAAC;IAOrF;;;;;;;OAOG;WACiB,2BAA2B,IAAI,OAAO,CAAC,6BAA6B,CAAC;IAUzF,OAAO,CAAC,OAAO;IAcf,OAAO,CAAC,aAAa;IAIrB,OAAO,CAAC,SAAS;IAIjB,OAAO,CAAC,SAAS;IAKjB,OAAO,CAAC,aAAa;IAQrB,OAAO,CAAC,iBAAiB;IAIzB,OAAO,CAAC,mBAAmB;IAI3B,OAAO,CAAC,WAAW;IASnB,gBAAgB;IAChB,kBAAkB,IAAI,IAAI;IAa1B,gBAAgB;IACT,MAAM,IAAI,KAAK,CAAC,SAAS;CAmCjC"}
+\ No newline at end of file
++{"version":3,"file":"Camera.d.ts","sourceRoot":"","sources":["../../src/Camera.tsx"],"names":[],"mappings":"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"}
+\ No newline at end of file
+diff --git a/src/Camera.tsx b/src/Camera.tsx
+index 26eb395f78853463f7abec068b1f5d9cc9d91a6d..3df125f8f6b8dace504d7caba9c40d1ce62bf2c1 100644
+--- a/src/Camera.tsx
++++ b/src/Camera.tsx
+@@ -388,6 +388,16 @@ export class Camera extends React.PureComponent<CameraProps, CameraState> {
+       throw tryParseNativeCameraError(e)
+     }
+   }
++  /**
++   * Scan code from local image.
++   */
++  public static async scanCode(fileUrl: string, config: Omit<CodeScanner, 'onCodeScanned'>): Promise<Code[]> {
++    try {
++      return await CameraModule.scanCode(fileUrl, config)
++    } catch (e) {
++      throw tryParseNativeCameraError(e)
++    }
++  }
+   //#endregion
+ 
+   //#region Events (Wrapped to maintain reference equality)

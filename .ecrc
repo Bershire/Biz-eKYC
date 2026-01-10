@@ -1,0 +1,28 @@
+{
+  "Verbose": false,
+  "IgnoreDefaults": false,
+  "Exclude": [
+    "^\\.ecrc$",
+    "\\.keystore$",
+    "\\.js$",
+    "\\.ts$",
+    "\\.tsx$",
+    "\\.mjs$",
+    "\\.cjs$",
+    "\\.svg$",
+    "\\.json$",
+    "\\.yml$",
+    "\\.lock$",
+    "\\.patch$",
+    "\\.md$"
+  ],
+  "SpacesAfterTabs": false,
+  "Disable": {
+    "EndOfLine": false,
+    "Indentation": false,
+    "IndentSize": false,
+    "InsertFinalNewline": false,
+    "TrimTrailingWhitespace": false,
+    "MaxLineLength": false
+  }
+}
