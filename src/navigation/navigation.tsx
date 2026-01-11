@@ -1,9 +1,10 @@
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, NavigationContainerRefWithCurrent, useNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import AuthenticationNavigator from './Authentication';
 import MainTabNavigator from './MainTab';
 import { useIsAuthenticated } from '../utils/useIsAuthenticated';
+import RNBootSplash from 'react-native-bootsplash';
 
 export type ApplicationStackParamList = {
   Authentication: undefined;
@@ -11,16 +12,20 @@ export type ApplicationStackParamList = {
 };
 
 export interface AppNavigatorProps {
-  onReady?: () => void;
+  onReady?: (ref: NavigationContainerRefWithCurrent<ApplicationStackParamList>) => void;
 }
 
 const Stack = createNativeStackNavigator<ApplicationStackParamList>();
 
 const AppNavigator: React.FC<AppNavigatorProps> = ({ onReady }) => {
   const isAuthenticated = useIsAuthenticated();
-
+  const navigationRef = useNavigationContainerRef();
   return (
-    <NavigationContainer onReady={onReady}>
+    <NavigationContainer
+      onReady={() => {
+        setTimeout(() => RNBootSplash.hide({ fade: true }), 5000);
+        onReady?.(navigationRef);
+      }}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
           <Stack.Screen name='MainTab' component={MainTabNavigator} />
