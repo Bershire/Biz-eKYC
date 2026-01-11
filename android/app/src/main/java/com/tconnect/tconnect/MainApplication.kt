@@ -1,4 +1,4 @@
-package com.tconnect.tconnect
+package com.bizekyc.bizekyc
 
 import android.app.Application
 import android.content.res.Configuration

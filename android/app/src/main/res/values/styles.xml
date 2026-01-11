@@ -9,5 +9,17 @@
     <item name="android:scrollbarThumbVertical">@color/scrollbar</item>
   </style>
 
-  <style name="AppTheme" parent="RootAppTheme" />
+  <style name="AppName" parent="RootAppTheme"></style>
+
+  <style name="RootBootTheme" parent="Theme.BootSplash.EdgeToEdge">
+    <item name="bootSplashBackground">@color/bootsplash_background</item>
+    <item name="bootSplashLogo">@drawable/bootsplash_logo</item>
+    <item name="postBootSplashTheme">@style/AppTheme</item>
+    <item name="darkContentBarsStyle">false</item>
+    <item name="android:windowLightNavigationBar">false</item>
+  </style>
+
+  <style name="BootTheme" parent="RootBootTheme">
+    <item name="android:navigationBarColor">#66000000</item>
+  </style>
 </resources>

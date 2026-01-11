@@ -119,14 +119,14 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.tconnect.tconnect"
+    namespace "com.bizekyc.bizekyc"
     defaultConfig {
-        applicationId "com.tconnect.tconnect"
+        applicationId "com.bizekyc.bizekyc"
         versionCode 121
         versionName "1.0.25"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        resValue "string", "build_config_package", "com.tconnect.tconnect"
+        resValue "string", "build_config_package", "com.bizekyc.bizekyc"
         vectorDrawables.useSupportLibrary = true
     }
 
@@ -152,6 +152,28 @@ android {
                 keyAlias keystoreProperties['keyAlias']
                 keyPassword keystoreProperties['keyPassword']
             }
+        }
+    }
+    flavorDimensions "default"
+    productFlavors {
+        development {
+            versionCode 1
+            versionName "1.0.1"
+            applicationIdSuffix ".uat"
+            signingConfig signingConfigs.debug
+            resValue "string", "google_services_json", "google-services.json"
+            buildConfigField "String", "EKYC_APP_ID", "\"681f5a4ca1981dde787c7954\""
+            buildConfigField "String", "EKYC_SIGNATURE", "\"db30f009534d177bd87e4119781ae3efe0bbf73d8a9dd19d754e784c2cd62f3468f988b2a04e465cb131a0f374ea8d3f10b8059e33cbe78917845714d77e772f\""
+            buildConfigField "String", "EKYC_BASE_URL", "\"https://ekyc-dev.sendmoney.co.jp\""
+        }
+        production {
+            versionCode 1
+            versionName "1.0.1"
+            signingConfig signingConfigs.productionRelease
+            resValue "string", "google_services_json", "google-services.json"
+            buildConfigField "String", "EKYC_APP_ID", "\"690c3b7908ce18f9da22970d\""
+            buildConfigField "String", "EKYC_SIGNATURE", "\"384ae455efa62ef8b7763f7a2ccae251770e4e15b9887661ce9510ac8cbfdd16602e678d33626087c894c9ec9e1a40091ed4719e4f6d74250bdddaa40128552a\""
+            buildConfigField "String", "EKYC_BASE_URL", "\"https://ekyc.sendmoney.co.jp\""
         }
     }
     buildTypes {

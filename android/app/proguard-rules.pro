@@ -10,4 +10,4 @@
 # Add any project specific keep options here:
 
 # react-native-config
--keep class com.tconnect.tconnect.BuildConfig { *; }
+-keep class com.bizekyc.bizekyc.BuildConfig { *; }

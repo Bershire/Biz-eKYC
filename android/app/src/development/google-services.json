@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "487847006108",
-    "project_id": "biz-e1927",
-    "storage_bucket": "biz-e1927.firebasestorage.app"
+    "project_number": "345895632812",
+    "project_id": "biz-ekyc-dev",
+    "storage_bucket": "biz-ekyc-dev.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:487847006108:android:6a4813008a77be7e774259",
+        "mobilesdk_app_id": "1:345895632812:android:f8353092bfc7b3f8de0409",
         "android_client_info": {
-          "package_name": "com.bizekyc.bizekyc"
+          "package_name": "com.bizekyc.bizekyc.uat"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyC3NRYR-AfCtrBqkkIBJCqbiEE8WYh8gc4"
+          "current_key": "AIzaSyBdlGtM6XmPSrlNHz5_NaCPb9D3YZzEw5M"
         }
       ],
       "services": {
