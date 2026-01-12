@@ -17,7 +17,8 @@ const resolutionLockRegex = /^(.+?)@npm:(?:.+)$/;
 
 let changed = false;
 for (const depType of ['dependencies', 'devDependencies', 'resolutions']) {
-  for (const [depName, depVersion] of Object.entries(pkg[depType])) {
+  const deps = pkg[depType] ?? {};
+  for (const [depName, depVersion] of Object.entries(deps)) {
     const res = patchVersionRegex.exec(depVersion);
     if (res) {
       const [_, prefix, currentVer, path] = res;

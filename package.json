@@ -81,11 +81,16 @@
     "reactotron-react-native": "5.1.18"
   },
   "devDependencies": {
+    "@babel/core": "7.28.5",
     "@react-native/babel-preset": "0.73.21",
     "@react-native/metro-config": "0.73.5",
     "@react-native/typescript-config": "0.73.1",
+    "@types/babel__core": "^7",
     "@types/node": "20.12.12",
     "@types/react": "18.2.79",
+    "husky": "9.1.7",
+    "lint-staged": "16.2.7",
+    "patch-package": "8.0.1",
     "typescript": "5.8.3"
   },
   "engines": {
