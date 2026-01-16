@@ -14,6 +14,42 @@
     "email": "メール",
     "password": "パスワード"
   },
+  "languageSelection": {
+    "title": "言語を選択",
+    "subtitle": "アプリの表示に使用する言語を選択してください。",
+    "choose": "選択",
+    "japanese": "日本語",
+    "english": "英語",
+    "vietnamese": "ベトナム語"
+  },
+  "onboarding": {
+    "back": "戻る",
+    "next": "次",
+    "getStarted": "始める",
+    "slides": {
+      "first": {
+        "title": "Biz-eKYCへようこそ",
+        "description": "ユーザーに迅速かつ信頼性の高いオンボーディング エクスペリエンスを提供するように設計された、安全で合理化された ID 検証プラットフォームです。"
+      },
+      "second": {
+        "title": "精密な検証",
+        "description": "Biz-eKYCは、高度なOCRと顔認識技術を活用し、身分証明書と生体認証データを高精度に認証します。ユーザーは、書類手続きや不要な手順を省き、30秒以内に認証プロセス全体を完了できます。"
+      },
+      "third": {
+        "title": "自信を持って接続",
+        "description": "すべての個人データは国際セキュリティ標準に従って暗号化され、検証プロセス全体にわたってエンドツーエンドの保護が保証され、安全なユーザーエクスペリエンスが実現します。"
+      }
+    }
+  },
+  "cameraPermissionDenied": "カメラの許可が拒否されました",
+  "genericErrorMessage": "エラーが発生しました。もう一度お試しください。",
+  "tryAgain": "再試行",
+  "button": {
+    "ok": "OK",
+    "confirm": "確認"
+  },
+  "seeMore": "詳細を見る",
+  "close": "閉じる",
   "account": {
     "logout": "ログアウト"
   }

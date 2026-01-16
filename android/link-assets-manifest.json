@@ -16,6 +16,14 @@
     {
       "path": "src/assets/fonts/Quicksand-SemiBold.ttf",
       "sha1": "4e2e55074090dae92fe7802b69a7bd9801a57fe0"
+    },
+    {
+      "path": "src/assets/fonts/NunitoSans.ttf",
+      "sha1": "8c01360cd531b3c1988d314db01656c8ef45207c"
+    },
+    {
+      "path": "src/assets/fonts/BeVietnamPro-Medium.ttf",
+      "sha1": "314eecd61a7cc7bc32cb6f33243b7051b51dcead"
     }
   ]
 }

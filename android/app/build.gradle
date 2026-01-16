@@ -269,3 +269,29 @@ dependencies {
 }
 
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
+apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"
+
+def loadEnvProp(String path, String propName) {
+    def result = null
+
+    File f = new File(path);
+    if (f.exists()) {
+        f.withReader { reader ->
+            String line
+            while ((line = reader.readLine()) != null) {
+                // https://regex101.com/r/cbm5Tp/1
+                def matcher = (line =~ /^\s*(?:export\s+|)([\w\d\.\-_]+)\s*=\s*['"]?(.*?)?['"]?\s*$/)
+                if (matcher.getCount() == 1 && matcher[0].size() == 3) {
+                    def name = matcher[0][1]
+                    def value = matcher[0][2].replace('"', '\\"')
+                    if (propName == name) {
+                        result = value
+                        break
+                    }
+                }
+            }
+        }
+    }
+
+    return result
+}

@@ -1,3 +1,5 @@
 <resources>
   <string name="app_name">Biz-eKYC</string>
+  <string name="facebook_app_id">1153916899314366</string>
+  <string name="facebook_client_token">e69e9b7abca95a71d5e70cfada20364f</string>
 </resources>

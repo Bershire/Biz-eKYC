@@ -7,13 +7,27 @@ import { Storage } from 'redux-persist';
 
 const keychainStorage: Storage = {
   setItem: async (key, value) => {
-    return !!(await setGenericPassword('user', `${value}`, { service: key }));
+    try {
+      return !!(await setGenericPassword('user', `${value}`, { service: key }));
+    } catch {
+      await resetGenericPassword({ service: key });
+      try {
+        return !!(await setGenericPassword('user', `${value}`, { service: key }));
+      } catch {
+        return false;
+      }
+    }
   },
   getItem: async key => {
-    const res = await getGenericPassword({ service: key });
-    if (res === false) return;
+    try {
+      const res = await getGenericPassword({ service: key });
+      if (res === false) return;
 
-    return res.password;
+      return res.password;
+    } catch {
+      await resetGenericPassword({ service: key });
+      return;
+    }
   },
   removeItem: async key => resetGenericPassword({ service: key }),
 };

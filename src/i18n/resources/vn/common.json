@@ -10,11 +10,47 @@
     "account": "Tai khoan"
   },
   "authentication": {
-    "signIn": "Dang nhap",
+    "signIn": "Đăng nhập",
     "email": "Email",
     "password": "Mat khau"
   },
+  "languageSelection": {
+    "title": "Chọn ngôn ngữ",
+    "subtitle": "Vui lòng chọn ngôn ngữ bạn muốn sử dụng cho giao diện ứng dụng.",
+    "choose": "Chọn",
+    "japanese": "Tiếng Nhật",
+    "english": "Tiếng Anh",
+    "vietnamese": "Tiếng Việt"
+  },
+  "onboarding": {
+    "back": "Quay lại",
+    "next": "Tiếp",
+    "getStarted": "Bắt đầu",
+    "slides": {
+      "first": {
+        "title": "Chào mừng đến với Biz-eKYC",
+        "description": "Nền tảng xác minh danh tính an toàn và hiệu quả, được thiết kế để cung cấp cho người dùng trải nghiệm đăng ký nhanh chóng và đáng tin cậy."
+      },
+      "second": {
+        "title": "Xác thực chính xác",
+        "description": "Biz-eKYC sử dụng công nghệ nhận dạng ký tự quang học (OCR) và nhận diện khuôn mặt tiên tiến để xác thực các tài liệu nhận dạng và dữ liệu sinh trắc học với độ chính xác cao. Người dùng có thể hoàn tất toàn bộ quy trình xác minh trong vòng chưa đầy 30 giây, không cần giấy tờ hay các bước không cần thiết."
+      },
+      "third": {
+        "title": "Kết nối với sự tự tin",
+        "description": "Tất cả dữ liệu cá nhân đều được mã hóa theo tiêu chuẩn bảo mật quốc tế, đảm bảo bảo vệ toàn diện trong suốt quá trình xác minh, mang đến trải nghiệm an toàn cho người dùng."
+      }
+    }
+  },
+  "cameraPermissionDenied": "Quyền truy cập máy ảnh bị từ chối",
+  "genericErrorMessage": "Đã xảy ra lỗi. Vui lòng thử lại.",
+  "tryAgain": "Thử lại",
+  "button": {
+    "ok": "OK",
+    "confirm": "Xác nhận"
+  },
+  "seeMore": "Xem thêm",
+  "close": "Đóng",
   "account": {
-    "logout": "Dang xuat"
+    "logout": "Đăng xuất"
   }
 }

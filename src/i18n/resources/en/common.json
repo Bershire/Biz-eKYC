@@ -14,6 +14,42 @@
     "email": "Email",
     "password": "Password"
   },
+  "languageSelection": {
+    "title": "Choose a language",
+    "subtitle": "Please choose the language you wish to use for the app interface.",
+    "choose": "Choose",
+    "japanese": "Japanese",
+    "english": "English",
+    "vietnamese": "Vietnamese"
+  },
+  "onboarding": {
+    "back": "Back",
+    "next": "Next",
+    "getStarted": "Get Started",
+    "slides": {
+      "first": {
+        "title": "Welcome to Biz-eKYC",
+        "description": "A secure and streamlined identity verification platform designed to provide users with a fast and reliable onboarding experience."
+      },
+      "second": {
+        "title": "Verify with Precision",
+        "description": "Biz-eKYC utilizes advanced OCR and facial recognition technology to authenticate identification documents and biometric data with high accuracy. Users can complete the entire verification process in under 30 seconds, without paperwork or unnecessary steps."
+      },
+      "third": {
+        "title": "Connect with Confidence",
+        "description": "All personal data is encrypted to international security standards, ensuring end-to-end protection throughout the verification process for a secure user experience."
+      }
+    }
+  },
+  "cameraPermissionDenied": "Camera permission denied",
+  "genericErrorMessage": "An error has occurred. Please try again.",
+  "tryAgain": "Try again",
+  "button": {
+    "ok": "OK",
+    "confirm": "Confirm"
+  },
+  "seeMore": "See more",
+  "close": "Close",
   "account": {
     "logout": "Log Out"
   }

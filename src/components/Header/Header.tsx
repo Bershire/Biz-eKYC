@@ -11,7 +11,6 @@ import { Theme } from 'src/theme/theme';
 import { useAppDispatch } from 'src/utils/useAppStore';
 import { useLayout } from 'src/utils/useLayout';
 import AppButton, { AppButtonProps } from '../AppButton/AppButton';
-import { drawer } from '../AppDrawer/drawer';
 import { AppScreenContext } from '../AppScreen/AppScreen';
 import AppText from '../AppText/AppText';
 import AppView, { AppAnimatedView } from '../AppView/AppView';
@@ -158,51 +157,6 @@ const Header: React.FC<HeaderProps> = ({
             }
           }}
         >
-          <AppView position='absolute' left={0} marginLeft='sm' onLayout={onLayoutLeft}>
-            {leftButtonType !== 'none' && (
-              <>
-                {hasSolidOverlap && (
-                  <AppAnimatedView
-                    {...COMMON_STYLES.absoluteFill}
-                    variant='sShadow'
-                    backgroundColor='background'
-                    borderRadius={sharedButtonProps.borderRadius}
-                    style={animatedSolidOverlapButtonStyle}
-                  />
-                )}
-                <AppButton
-                  icon={leftButtonIcon}
-                  iconStyle={{
-                    width: leftButtonIcon === 'chevronLeft' ? 18 : 26,
-                    color:
-                      leftButtonType === 'back' ?
-                        variant === 'light' ?
-                          'invertedIcon'
-                        : 'primary'
-                      : undefined,
-                  }}
-                  onPress={() => {
-                    if (leftButtonType === 'menu') {
-                      drawer.current?.open();
-                    } else {
-                      if (typeof leftButtonAction === 'function') {
-                        leftButtonAction();
-                      } else {
-                        navigation.goBack();
-                      }
-                    }
-                  }}
-                  width={backButtonLabelVisible ? 'auto' : 35}
-                  height={35}
-                  {...sharedButtonProps}
-                  paddingRight={leftButtonIcon === 'chevronLeft' ? '3xs' : undefined}
-                  hitSlop={15}
-                  text={backButtonLabelVisible ? 'BACK' : ''}
-                />
-              </>
-            )}
-          </AppView>
-
           <AppView
             justifyContent='center'
             alignItems='center'

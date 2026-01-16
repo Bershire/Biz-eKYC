@@ -5,7 +5,7 @@ import resources from './resources';
 const ns = Object.keys(Object.values(resources)[0] || {});
 export const defaultNS = 'common';
 
-const defaultLang = 'vn';
+const defaultLang = 'en';
 
 const LANGUAGE_LOCAL_CODES: Record<string, string> = {
   vn: 'vi',
@@ -20,7 +20,7 @@ i18n
     defaultNS,
     resources,
     lng: defaultLang,
-    fallbackLng: 'vn',
+    fallbackLng: 'en',
     returnNull: false,
     interpolation: {
       escapeValue: false,
