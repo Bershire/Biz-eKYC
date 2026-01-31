@@ -3,36 +3,46 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FONT_FAMILIES } from 'src/assets/fonts';
-import { ICONS } from 'src/assets/icons';
 import AppText from 'src/components/AppText/AppText';
 import AppTouchableOpacity from 'src/components/AppTouchableOpacity/AppTouchableOpacity';
 import AppView from 'src/components/AppView/AppView';
+import Icon, { IconProps } from 'src/components/Icon/Icon';
 import { AuthenticationParamList } from 'src/navigation/Authentication';
+import { setHasLaunched } from 'src/store/appMeta';
+import { useAppDispatch } from 'src/utils/useAppStore';
 
 const OnboardingScreen = () => {
   const { t } = useTranslation('common');
   const navigation = useNavigation<NativeStackNavigationProp<AuthenticationParamList>>();
+  const dispatch = useAppDispatch();
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const slides = useMemo(
+  type Slide = {
+    key: string;
+    title: string;
+    description: string;
+    iconType: IconProps['type'];
+  };
+
+  const slides: Slide[] = useMemo(
     () => [
       {
         key: 'first',
         title: t('onboarding.slides.first.title'),
         description: t('onboarding.slides.first.description'),
-        Icon: ICONS.nF,
+        iconType: 'nextFirst',
       },
       {
         key: 'second',
         title: t('onboarding.slides.second.title'),
         description: t('onboarding.slides.second.description'),
-        Icon: ICONS.nS,
+        iconType: 'nextSecond',
       },
       {
         key: 'third',
         title: t('onboarding.slides.third.title'),
         description: t('onboarding.slides.third.description'),
-        Icon: ICONS.nT,
+        iconType: 'nextThird',
       },
     ],
     [t],
@@ -44,6 +54,7 @@ const OnboardingScreen = () => {
 
   const handleNext = () => {
     if (activeIndex === slides.length - 1) {
+      dispatch(setHasLaunched(true));
       navigation.replace('Login');
       return;
     }
@@ -64,39 +75,39 @@ const OnboardingScreen = () => {
     return null;
   }
 
-  const Icon = currentSlide.Icon;
-
   return (
     <AppView
       flex={1}
       backgroundColor='background'
       paddingHorizontal='lg'
-      paddingTop='2xl'
+      paddingTop='3xl'
       paddingBottom='xl'
     >
       <AppView flex={1} alignItems='center'>
-        <AppView marginTop='sm' marginBottom='lg'>
-          <Icon width={200} height={200} />
+        <AppView marginTop='3xl' marginBottom='2xl'>
+          <Icon type={currentSlide.iconType} width={200} height={200} />
         </AppView>
         <AppText
-          fontSize={22}
-          lineHeight={26}
+          fontSize={24}
+          lineHeight={33}
           fontWeight='700'
           fontFamily={FONT_FAMILIES.nunitoSans}
-          color='primary'
+          color='brightBlue'
           textAlign='center'
-          marginBottom='sm'
+          marginBottom='lg'
         >
           {currentSlide.title}
         </AppText>
         <AppText
-          fontSize={14}
+          fontSize={16}
           lineHeight={20}
-          fontWeight='400'
-          fontFamily={FONT_FAMILIES.nunitoSans}
-          color='text500'
+          fontFamily={FONT_FAMILIES.nunitoSansRegular}
+          color='nearBlack'
+          fontWeight='500'
           textAlign='center'
           paddingHorizontal='2xs'
+          marginLeft='lg'
+          marginRight='lg'
         >
           {currentSlide.description}
         </AppText>
@@ -110,8 +121,9 @@ const OnboardingScreen = () => {
               width={8}
               height={8}
               borderRadius='md'
-              backgroundColor={isActive ? 'primary' : 'secondary'}
+              backgroundColor={isActive ? 'deepBlue' : 'secondary'}
               marginRight={index < slides.length - 1 ? 'xs' : 'none'}
+              marginBottom='md'
             />
           );
         })}
@@ -121,19 +133,19 @@ const OnboardingScreen = () => {
           onPress={handleBack}
           disabled={isBackDisabled}
           flex={1}
-          height={48}
+          height={54}
           borderRadius='lg'
           borderWidth={1.5}
-          borderColor={isBackDisabled ? 'text100' : 'primary'}
+          borderColor={isBackDisabled ? 'text100' : 'deepBlue'}
           alignItems='center'
           justifyContent='center'
           marginRight='md'
         >
           <AppText
             fontSize={16}
-            fontWeight='600'
-            fontFamily={FONT_FAMILIES.nunitoSans}
-            color={isBackDisabled ? 'text300' : 'primary'}
+            fontWeight='700'
+            fontFamily={FONT_FAMILIES.nunitoSansRegular}
+            color={isBackDisabled ? 'text300' : 'brightBlue'}
           >
             {t('onboarding.back')}
           </AppText>
@@ -141,21 +153,20 @@ const OnboardingScreen = () => {
         <AppTouchableOpacity
           onPress={handleNext}
           flex={1}
-          height={48}
+          height={54}
           borderRadius='lg'
-          backgroundColor='primary'
+          backgroundColor='deepBlue'
           alignItems='center'
           justifyContent='center'
+          marginBottom='md'
         >
           <AppText
             fontSize={16}
-            fontWeight='600'
-            fontFamily={FONT_FAMILIES.nunitoSans}
+            fontWeight='700'
+            fontFamily={FONT_FAMILIES.nunitoSansBold}
             color='text000'
           >
-            {activeIndex === slides.length - 1
-              ? t('onboarding.getStarted')
-              : t('onboarding.next')}
+            {activeIndex === slides.length - 1 ? t('onboarding.getStarted') : t('onboarding.next')}
           </AppText>
         </AppTouchableOpacity>
       </AppView>

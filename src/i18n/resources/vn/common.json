@@ -10,9 +10,30 @@
     "account": "Tai khoan"
   },
   "authentication": {
-    "signIn": "Đăng nhập",
+    "logIn": "Đăng nhập",
+    "signUp": "Đăng ký",
     "email": "Email",
-    "password": "Mat khau"
+    "password": "Mat khau",
+    "welcomeTitle": "Chào mừng,\nRất vui được gặp bạn!",
+    "createAccountTitle": "Tạo tài khoản\nđể bắt đầu ngay!",
+    "emailPlaceholder": "Nhập email của bạn...",
+    "passwordPlaceholder": "Nhập mật khẩu của bạn...",
+    "confirmPasswordPlaceholder": "Nhập lại mật khẩu...",
+    "passwordMismatch": "Mật khẩu không khớp.",
+    "registrationSuccessful": "Đăng ký thành công!",
+    "accountCreatedSuccessfully": "Tài khoản của bạn đã được tạo thành công.",
+    "redirectingToHome": "Đang chuyển về trang chủ sau {{seconds}}s...",
+    "rememberMe": "Ghi nhớ đăng nhập",
+    "forgotPassword": "Quên mật khẩu?",
+    "orLoginWith": "Hoặc đăng nhập với",
+    "or": "Hoặc",
+    "continueWithGoogle": "Tiếp tục với Google",
+    "continueWithFacebook": "Tiếp tục với Facebook",
+    "continueWithApple": "Tiếp tục với Apple ID",
+    "dontHaveAccount": "Chưa có tài khoản?",
+    "signUpNow": "Đăng ký ngay",
+    "alreadyHaveAccount": "Đã có tài khoản?",
+    "loginNow": "Đăng nhập ngay"
   },
   "languageSelection": {
     "title": "Chọn ngôn ngữ",
@@ -52,5 +73,20 @@
   "close": "Đóng",
   "account": {
     "logout": "Đăng xuất"
+  },
+  "others": {
+    "personalInformation": "Thông tin cá nhân",
+    "systemSettings": "Cài đặt hệ thống",
+    "informationLegal": "Thông tin & Pháp lý",
+    "fullName": "Họ và tên",
+    "email": "Email",
+    "phoneNumber": "Số điện thoại",
+    "dateOfBirth": "Ngày sinh",
+    "language": "Ngôn ngữ",
+    "english": "Tiếng Anh",
+    "changePassword": "Đổi mật khẩu",
+    "termsOfService": "Điều khoản dịch vụ",
+    "userGuide": "Hướng dẫn sử dụng",
+    "saveChanges": "Lưu thay đổi"
   }
 }

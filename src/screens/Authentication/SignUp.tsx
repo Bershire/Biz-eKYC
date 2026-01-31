@@ -1,8 +1,8 @@
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image, ScrollView, useWindowDimensions } from 'react-native';
+import { Image, Modal, ScrollView, useWindowDimensions } from 'react-native';
 import { FONT_FAMILIES } from 'src/assets/fonts';
 import { IMAGES } from 'src/assets/images';
 import logoBiz from 'src/assets/images/bootsplash/bootsplash_logo.png';
@@ -13,20 +13,26 @@ import AppTouchableOpacity from 'src/components/AppTouchableOpacity/AppTouchable
 import AppView from 'src/components/AppView/AppView';
 import Icon from 'src/components/Icon/Icon';
 import { AuthenticationParamList } from 'src/navigation/Authentication';
-import { updateAuthState } from '../../store/auth';
-import { useAppDispatch } from '../../utils/useAppStore';
+import { updateAuthState } from 'src/store/auth';
+import { useAppDispatch } from 'src/utils/useAppStore';
 
-const LoginScreen = () => {
+const SignUpScreen = () => {
   const { t } = useTranslation('common');
   const navigation = useNavigation<NativeStackNavigationProp<AuthenticationParamList>>();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
   const dispatch = useAppDispatch();
   const { height: screenHeight } = useWindowDimensions();
   const heroHeight = Math.max(320, Math.floor(screenHeight * 0.468));
 
-  const loginDisabled = !email.trim() || !password;
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [redirectSeconds, setRedirectSeconds] = useState(3);
+
+  const isPasswordMismatch = !!confirmPassword && password !== confirmPassword;
+  const signUpDisabled =
+    !email.trim() || !password || !confirmPassword || isPasswordMismatch || showSuccess;
 
   const socialButtons = useMemo(
     () => [
@@ -49,10 +55,29 @@ const LoginScreen = () => {
     [t],
   );
 
-  const submitLogin = () => {
-    if (loginDisabled) return;
-    dispatch(updateAuthState({ token: 'local-token', refreshToken: 'local-refresh' }));
+  const submitSignUp = () => {
+    if (signUpDisabled) return;
+    setShowSuccess(true);
   };
+
+  useEffect(() => {
+    if (!showSuccess) return;
+    setRedirectSeconds(3);
+    const endAt = Date.now() + 3000;
+    const intervalId = setInterval(() => {
+      const remainingMs = Math.max(0, endAt - Date.now());
+      setRedirectSeconds(Math.max(0, Math.ceil(remainingMs / 1000)));
+    }, 250);
+    const timeoutId = setTimeout(() => {
+      dispatch(updateAuthState({ token: 'local-token', refreshToken: 'local-refresh' }));
+    }, 3000);
+    return () => {
+      clearInterval(intervalId);
+      clearTimeout(timeoutId);
+    };
+  }, [dispatch, showSuccess]);
+
+  const progress = (3 - redirectSeconds) / 3;
 
   return (
     <AppView flex={1} backgroundColor='background'>
@@ -63,7 +88,7 @@ const LoginScreen = () => {
           backgroundColor='deepBlue'
           height={heroHeight}
           paddingHorizontal='lg'
-          paddingTop='3xl'
+          paddingTop='2xl'
           paddingBottom='3xl'
           justifyContent='flex-start'
         >
@@ -94,7 +119,7 @@ const LoginScreen = () => {
               marginTop='4xs'
               marginBottom='md'
             >
-              {t('authentication.welcomeTitle')}
+              {t('authentication.createAccountTitle')}
             </AppText>
           </AppView>
         </AppImageBackground>
@@ -104,7 +129,7 @@ const LoginScreen = () => {
           paddingHorizontal='lg'
           paddingTop='sm'
           paddingBottom='xl'
-          marginTop='-4xl'
+          marginTop='-5xl'
           marginBottom='2xl'
         >
           <AppView
@@ -143,6 +168,30 @@ const LoginScreen = () => {
                 color: 'shadow',
               }}
             />
+            <AppTextInput
+              isPassword
+              placeholder={t('authentication.confirmPasswordPlaceholder')}
+              height={46}
+              value={confirmPassword}
+              onChange={setConfirmPassword}
+              marginBottom='md'
+              textInputProps={{
+                fontSize: 16,
+                fontFamily: FONT_FAMILIES.nunitoSansRegular,
+                color: 'shadow',
+              }}
+            />
+            {isPasswordMismatch && (
+              <AppText
+                fontSize={12}
+                lineHeight={16}
+                fontFamily={FONT_FAMILIES.nunitoSansRegular}
+                color='danger'
+                marginBottom='md'
+              >
+                {t('authentication.passwordMismatch')}
+              </AppText>
+            )}
 
             <AppView flexDirection='row' alignItems='center' justifyContent='space-between'>
               <AppTouchableOpacity
@@ -179,11 +228,11 @@ const LoginScreen = () => {
             </AppView>
 
             <AppTouchableOpacity
-              onPress={submitLogin}
-              disabled={loginDisabled}
+              onPress={submitSignUp}
+              disabled={signUpDisabled}
               height={48}
               borderRadius='lg'
-              backgroundColor={'deepBlue'}
+              backgroundColor='deepBlue'
               alignItems='center'
               justifyContent='center'
               marginTop='lg'
@@ -194,9 +243,9 @@ const LoginScreen = () => {
                 lineHeight={22}
                 fontWeight='700'
                 fontFamily={FONT_FAMILIES.nunitoSans}
-                color={'text000'}
+                color='text000'
               >
-                {t('authentication.logIn')}
+                {t('authentication.signUp')}
               </AppText>
             </AppTouchableOpacity>
 
@@ -214,7 +263,7 @@ const LoginScreen = () => {
                 fontFamily={FONT_FAMILIES.nunitoSansRegular}
                 color='text300'
               >
-                {t('authentication.orLoginWith')}
+                {t('authentication.or')}
               </AppText>
               <AppView flex={1} height={1} backgroundColor='text050' />
             </AppView>
@@ -251,9 +300,9 @@ const LoginScreen = () => {
                 fontFamily={FONT_FAMILIES.nunitoSansRegular}
                 color='text300'
               >
-                {t('authentication.dontHaveAccount')}
+                {t('authentication.alreadyHaveAccount')}
               </AppText>
-              <AppTouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+              <AppTouchableOpacity onPress={() => navigation.replace('Login')}>
                 <AppText
                   marginLeft='xs'
                   fontSize={14}
@@ -262,15 +311,100 @@ const LoginScreen = () => {
                   fontWeight='700'
                   color='brightBlue'
                 >
-                  {t('authentication.signUpNow')}
+                  {t('authentication.loginNow')}
                 </AppText>
               </AppTouchableOpacity>
             </AppView>
           </AppView>
         </AppView>
       </ScrollView>
+      <Modal animationType='fade' transparent visible={showSuccess} onRequestClose={() => null}>
+        <AppView
+          flex={1}
+          alignItems='center'
+          justifyContent='center'
+          style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+          paddingHorizontal='md'
+        >
+          <AppView
+            alignItems='center'
+            backgroundColor='background'
+            borderRadius='lg'
+            padding='lg'
+            shadowColor='shadow'
+            shadowOpacity={0.15}
+            shadowRadius={16}
+            shadowOffset={{ width: 0, height: 8 }}
+            elevation={8}
+            style={{ width: '100%', height: 339 }}
+          >
+            <AppView alignItems='center' marginBottom='2xl'>
+              <AppView
+                width={90}
+                height={90}
+                borderRadius='round'
+                alignItems='center'
+                justifyContent='center'
+                backgroundColor='deepBlue'
+                marginBottom='lg'
+              >
+                <Icon
+                  type='registerCheck'
+                  width={42}
+                  height={27}
+                  color='text000'
+                  borderWidth={8}
+                  borderColor='text000'
+                  style={{ transform: [{ scale: 1.3 }] }}
+                />
+              </AppView>
+              <AppText
+                fontSize={24}
+                lineHeight={24}
+                height={33}
+                fontWeight='700'
+                fontFamily={FONT_FAMILIES.nunitoSansBold}
+                color='brightBlue'
+                textAlign='center'
+                marginBottom='2xs'
+              >
+                {t('authentication.registrationSuccessful')}
+              </AppText>
+              <AppText
+                fontSize={16}
+                lineHeight={20}
+                fontFamily={FONT_FAMILIES.nunitoSansRegular}
+                color='backgroundContrast'
+                textAlign='center'
+              >
+                {t('authentication.accountCreatedSuccessfully')}
+              </AppText>
+            </AppView>
+            <AppView width='100%'>
+              <AppText
+                fontSize={16}
+                lineHeight={16}
+                fontFamily={FONT_FAMILIES.nunitoSansRegular}
+                color='text100'
+                textAlign='center'
+                marginBottom='md'
+              >
+                {t('authentication.redirectingToHome', { seconds: redirectSeconds })}
+              </AppText>
+              <AppView width='100%' height={6} borderRadius='round' backgroundColor='text050'>
+                <AppView
+                  height={6}
+                  borderRadius='round'
+                  backgroundColor='deepBlue'
+                  style={{ width: `${Math.min(1, Math.max(0, progress)) * 100}%` }}
+                />
+              </AppView>
+            </AppView>
+          </AppView>
+        </AppView>
+      </Modal>
     </AppView>
   );
 };
 
-export default LoginScreen;
+export default SignUpScreen;

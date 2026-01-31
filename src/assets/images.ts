@@ -3,7 +3,9 @@
 //
 
 import bg from 'src/assets/images/bg.png';
+import loginBackground from 'src/assets/images/login-background.png';
 
 export const IMAGES = {
-    bg
+  bg,
+  loginBackground,
 };

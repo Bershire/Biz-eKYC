@@ -3,6 +3,7 @@ import { FONT_FAMILIES } from 'src/assets/fonts';
 export const palette = {
   transparent: '#00000000',
   black: '#000000',
+  nearBlack: '#151515',
   gray600: '#0F0D0F',
   gray530: '#1D1D1D',
   gray560: '#2B2B2B',
@@ -12,6 +13,10 @@ export const palette = {
   gray200: '#A29FA0',
   gray100: '#D2D2D2',
   gray50: '#e0e0e0',
+  lightGray: '#F8F8F8',
+  softGray: '#EDEDED',
+  coolGray: '#AAAAAA',
+  gainsboro: '#FBFBFB',
   white: '#ffffff',
   almostWhite: '#F2F4F7',
 
@@ -19,6 +24,9 @@ export const palette = {
   lightBlue: '#7dbcff',
   lighterBlue: '#abd8ff',
   lavenderBlue: '#D0D8FF',
+  deepBlue: '#066FDB',
+  brightBlue: '#395FF9',
+  cornflowerBlue: '#4D81E7',
   darkBlue: '#084C96',
   modalBorder: '#8BA6CF',
   red: '#d60000',

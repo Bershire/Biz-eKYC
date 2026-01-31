@@ -10,9 +10,30 @@
     "account": "Account"
   },
   "authentication": {
-    "signIn": "Sign In",
+    "logIn": "Log In",
+    "signUp": "Sign Up",
     "email": "Email",
-    "password": "Password"
+    "password": "Password",
+    "welcomeTitle": "Welcome,\nGlad to see you!",
+    "createAccountTitle": "Create Account\nto get started now!",
+    "emailPlaceholder": "Enter your email...",
+    "passwordPlaceholder": "Enter your password...",
+    "confirmPasswordPlaceholder": "Enter your password...",
+    "passwordMismatch": "Passwords do not match.",
+    "registrationSuccessful": "Registration Successful!",
+    "accountCreatedSuccessfully": "Your account has been created successfully.",
+    "redirectingToHome": "Redirecting to Home screen in {{seconds}}s...",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot Password ?",
+    "orLoginWith": "Or login with",
+    "or": "Or",
+    "continueWithGoogle": "Continue with Google",
+    "continueWithFacebook": "Continue with Facebook",
+    "continueWithApple": "Continue with Apple ID",
+    "dontHaveAccount": "Don't have an account?",
+    "signUpNow": "Sign Up Now",
+    "alreadyHaveAccount": "Already have an account?",
+    "loginNow": "Login Now"
   },
   "languageSelection": {
     "title": "Choose a language",
@@ -52,5 +73,20 @@
   "close": "Close",
   "account": {
     "logout": "Log Out"
+  },
+  "others": {
+    "personalInformation": "Personal information",
+    "systemSettings": "System settings",
+    "informationLegal": "Information & Legal",
+    "fullName": "Full name",
+    "email": "Email",
+    "phoneNumber": "Phone number",
+    "dateOfBirth": "Date of birth",
+    "language": "Language",
+    "english": "English",
+    "changePassword": "Change password",
+    "termsOfService": "Terms of Service",
+    "userGuide": "User guide",
+    "saveChanges": "Save changes"
   }
 }

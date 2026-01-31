@@ -5,4 +5,7 @@ export const FONT_FAMILIES = {
   bold: 'Quicksand-Bold',
   nunitoSans: 'NunitoSans',
   beVietNamPro: 'BeVietnamPro-Medium',
+  nunitoSansRegular: 'NunitoSans-Regular',
+  nunitoSansBold: 'NunitoSans-Bold',
+  nunitoSansSemiBold: 'NunitoSans-SemiBold',
 };

@@ -23,7 +23,7 @@ const AppNavigator: React.FC<AppNavigatorProps> = ({ onReady }) => {
   return (
     <NavigationContainer
       onReady={() => {
-        setTimeout(() => RNBootSplash.hide({ fade: true }), 5000);
+        setTimeout(() => RNBootSplash.hide({ fade: true }), 500);
         onReady?.(navigationRef);
       }}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>

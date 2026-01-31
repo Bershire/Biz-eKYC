@@ -10,9 +10,30 @@
     "account": "アカウント"
   },
   "authentication": {
-    "signIn": "ログイン",
+    "logIn": "ログイン",
+    "signUp": "サインアップ",
     "email": "メール",
-    "password": "パスワード"
+    "password": "パスワード",
+    "welcomeTitle": "ようこそ、\nお会いできてうれしいです！",
+    "createAccountTitle": "アカウント作成\n今すぐ始めましょう！",
+    "emailPlaceholder": "メールアドレスを入力...",
+    "passwordPlaceholder": "パスワードを入力...",
+    "confirmPasswordPlaceholder": "パスワードを入力...",
+    "passwordMismatch": "パスワードが一致しません。",
+    "registrationSuccessful": "登録が完了しました！",
+    "accountCreatedSuccessfully": "アカウントが正常に作成されました。",
+    "redirectingToHome": "ホーム画面へ{{seconds}}秒後に移動します...",
+    "rememberMe": "ログイン状態を保持",
+    "forgotPassword": "パスワードをお忘れですか？",
+    "orLoginWith": "または次でログイン",
+    "or": "または",
+    "continueWithGoogle": "Google で続行",
+    "continueWithFacebook": "Facebook で続行",
+    "continueWithApple": "Apple ID で続行",
+    "dontHaveAccount": "アカウントをお持ちでないですか？",
+    "signUpNow": "今すぐ登録",
+    "alreadyHaveAccount": "すでにアカウントをお持ちですか？",
+    "loginNow": "ログイン"
   },
   "languageSelection": {
     "title": "言語を選択",
@@ -52,5 +73,20 @@
   "close": "閉じる",
   "account": {
     "logout": "ログアウト"
+  },
+  "others": {
+    "personalInformation": "個人情報",
+    "systemSettings": "システム設定",
+    "informationLegal": "情報と法律",
+    "fullName": "氏名",
+    "email": "メール",
+    "phoneNumber": "電話番号",
+    "dateOfBirth": "生年月日",
+    "language": "言語",
+    "english": "英語",
+    "changePassword": "パスワード変更",
+    "termsOfService": "利用規約",
+    "userGuide": "ユーザーガイド",
+    "saveChanges": "変更を保存"
   }
 }

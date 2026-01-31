@@ -22,6 +22,18 @@
       "sha1": "8c01360cd531b3c1988d314db01656c8ef45207c"
     },
     {
+      "path": "src/assets/fonts/NunitoSans-Regular",
+      "sha1": "b5dcea57b4b339f320a0d29930102346bd439a67"
+    },
+    {
+      "path": "src/assets/fonts/NunitoSans-SemiBold",
+      "sha1": "39cfe5baa44fabd96d217ab714540ac9d8c64eaa"
+    },
+    {
+      "path": "src/assets/fonts/NunitoSans-Bold",
+      "sha1": "1657b1460f2a4abcacb010527c6519691b6f4e05"
+    },
+    {
       "path": "src/assets/fonts/BeVietnamPro-Medium.ttf",
       "sha1": "314eecd61a7cc7bc32cb6f33243b7051b51dcead"
     }

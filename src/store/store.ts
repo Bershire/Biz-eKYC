@@ -15,6 +15,7 @@ import { api, externalApi } from '../services/api';
 import apiUrlSlice from './apiUrl';
 import appMetaSlice from './appMeta';
 import authSlice from './auth';
+import personalInfoSlice from './personalInfo';
 import settingsSlice from './settings';
 import keychainStorage from './storages/keychain';
 import mmkvStorage from './storages/mmkv';
@@ -34,6 +35,7 @@ const reducers = combineReducers({
   // Slices
   [authSlice.name]: authReducer,
   [settingsSlice.name]: settingsSlice.reducer,
+  [personalInfoSlice.name]: personalInfoSlice.reducer,
   [apiUrlSlice.name]: apiUrlSlice.reducer,
   [uiSlice.name]: uiSlice.reducer,
   [appMetaSlice.name]: appMetaSlice.reducer,
@@ -47,7 +49,7 @@ const persistedReducer = persistReducer<ReturnType<typeof reducers>>(
   {
     key: 'root',
     storage: mmkvStorage,
-    whitelist: [settingsSlice.name, appMetaSlice.name],
+    whitelist: [settingsSlice.name, appMetaSlice.name, personalInfoSlice.name],
     stateReconciler: autoMergeLevel2,
     timeout: 0, // 0 means infinite timeout
   },
