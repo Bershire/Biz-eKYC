@@ -1,0 +1,61 @@
+{
+  "tabBar": {
+    "home": "Beranda",
+    "others": "Lainnya",
+    "account": "Akun"
+  },
+  "screens": {
+    "home": "Beranda",
+    "others": "Lainnya",
+    "account": "Akun"
+  },
+  "authentication": {
+    "signIn": "Masuk",
+    "email": "Email",
+    "password": "Kata sandi"
+  },
+  "welcome": {
+    "title": "Biz-eKYC",
+    "description": "Identitas Aman\nKemitraan Tepercaya",
+    "continue": "Lanjut"
+  },
+  "languageSelection": {
+    "title": "Pilih bahasa",
+    "subtitle": "Silakan pilih bahasa yang ingin digunakan untuk antarmuka aplikasi.",
+    "choose": "Pilih",
+    "japanese": "Bahasa Jepang",
+    "english": "Bahasa Inggris",
+    "vietnamese": "Bahasa Vietnam"
+  },
+  "onboarding": {
+    "back": "Kembali",
+    "next": "Lanjut",
+    "getStarted": "Mulai",
+    "slides": {
+      "first": {
+        "title": "Selamat datang di Biz-eKYC",
+        "description": "Platform verifikasi identitas yang aman dan efisien, dirancang untuk memberikan pengalaman onboarding yang cepat dan andal."
+      },
+      "second": {
+        "title": "Verifikasi dengan Presisi",
+        "description": "Biz-eKYC menggunakan teknologi OCR dan pengenalan wajah canggih untuk mengautentikasi dokumen identitas dan data biometrik dengan akurasi tinggi. Pengguna dapat menyelesaikan seluruh proses verifikasi dalam waktu kurang dari 30 detik, tanpa dokumen fisik atau langkah yang tidak perlu."
+      },
+      "third": {
+        "title": "Terhubung dengan Percaya Diri",
+        "description": "Semua data pribadi dienkripsi sesuai standar keamanan internasional, memastikan perlindungan menyeluruh selama proses verifikasi untuk pengalaman pengguna yang aman."
+      }
+    }
+  },
+  "cameraPermissionDenied": "Izin kamera ditolak",
+  "genericErrorMessage": "Terjadi kesalahan. Silakan coba lagi.",
+  "tryAgain": "Coba lagi",
+  "button": {
+    "ok": "OK",
+    "confirm": "Konfirmasi"
+  },
+  "seeMore": "Lihat lainnya",
+  "close": "Tutup",
+  "account": {
+    "logout": "Keluar"
+  }
+}

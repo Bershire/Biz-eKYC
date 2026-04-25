@@ -8,10 +8,13 @@ import AppText from 'src/components/AppText/AppText';
 import AppTouchableOpacity from 'src/components/AppTouchableOpacity/AppTouchableOpacity';
 import AppView from 'src/components/AppView/AppView';
 import { AuthenticationParamList } from 'src/navigation/Authentication';
+import { setHasLaunched } from 'src/store/appMeta';
+import { useAppDispatch } from 'src/utils/useAppStore';
 
 const OnboardingScreen = () => {
   const { t } = useTranslation('common');
   const navigation = useNavigation<NativeStackNavigationProp<AuthenticationParamList>>();
+  const dispatch = useAppDispatch();
   const [activeIndex, setActiveIndex] = useState(0);
 
   const slides = useMemo(
@@ -44,6 +47,7 @@ const OnboardingScreen = () => {
 
   const handleNext = () => {
     if (activeIndex === slides.length - 1) {
+      dispatch(setHasLaunched(true));
       navigation.replace('Login');
       return;
     }
@@ -61,7 +65,7 @@ const OnboardingScreen = () => {
   };
 
   if (!currentSlide) {
-    return null;
+    return undefined;
   }
 
   const Icon = currentSlide.Icon;

@@ -3,12 +3,16 @@
 //
 
 import enCommon from './resources/en/common.json';
+import idCommon from './resources/id/common.json';
 import jpCommon from './resources/jp/common.json';
 import vnCommon from './resources/vn/common.json';
 
 const resources = {
   en: {
     common: enCommon,
+  },
+  id: {
+    common: idCommon,
   },
   jp: {
     common: jpCommon,

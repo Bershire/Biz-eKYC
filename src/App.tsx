@@ -11,10 +11,12 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import './i18n/i18n';
+import { getDeviceLanguage, getSupportedLanguage } from './i18n/i18n';
 import AppNavigator from './navigation/navigation';
 import { useFirebaseMutation } from './services/auth';
 import { setApiUrl } from './store/apiUrl';
 import { selectToken } from './store/auth';
+import { setLanguageSetting } from './store/settings';
 import { persistor, store } from './store/store';
 import theme from './theme/theme';
 import { scrubSentryEvent } from './utils/scrubber';
@@ -23,7 +25,7 @@ import { validateEnvConfig } from './utils/validateEnvConfig';
 import { z } from 'zod';
 
 const navigationIntegration = Sentry.reactNavigationIntegration({});
-const allSettled = Promise.allSettled;
+const allSettled = Promise.allSettled.bind(Promise);
 Sentry.init({
   dsn:
     __DEV__ ? undefined : (
@@ -51,13 +53,12 @@ Sentry.init({
   beforeSend: scrubSentryEvent,
   beforeSendTransaction: scrubSentryEvent,
 });
-Promise.allSettled = allSettled.bind(Promise);
+Promise.allSettled = allSettled;
 const Entrypoint = () => {
   const { t, i18n } = useTranslation();
   const [apiUrlGet, setApiUrlGet] = useState(false);
   const dispatch = useAppDispatch();
   const language = useAppSelector(s => s.settings.language);
-  const hasLaunched = useAppSelector(s => s.appMeta.hasLaunched);
   const token = useAppSelector(selectToken);
   const [registerFirebaseToken] = useFirebaseMutation();
   const [hasRegisteredFirebaseToken, setHasRegisteredFirebaseToken] = useState(false);
@@ -91,7 +92,7 @@ const Entrypoint = () => {
             setHasRegisteredFirebaseToken(true);
           }
         })
-        .catch(error => {
+        .catch((error: unknown) => {
           console.log('ERROR', error);
         });
     }
@@ -101,8 +102,17 @@ const Entrypoint = () => {
   }, []);
 
   useEffect(() => {
-    i18n.changeLanguage(language);
-  }, [i18n, language]);
+    const persistedLanguage = language ? getSupportedLanguage(language) : undefined;
+    const nextLanguage = persistedLanguage ?? getDeviceLanguage();
+
+    if (language !== nextLanguage) {
+      dispatch(setLanguageSetting(nextLanguage));
+    }
+
+    if (i18n.language !== nextLanguage) {
+      i18n.changeLanguage(nextLanguage);
+    }
+  }, [dispatch, i18n, language]);
 
   useEffect(() => {
     const getApiUrl = async () => {
@@ -117,7 +127,7 @@ const Entrypoint = () => {
         dispatch(setApiUrl(apiUrl));
         setApiUrlGet(true);
       })
-      .catch(error => {
+      .catch((error: unknown) => {
         console.log(error);
         Alert.alert(t('genericErrorMessage'), '', [
           { text: t('button.ok'), onPress: () => RNExitApp.exitApp() },

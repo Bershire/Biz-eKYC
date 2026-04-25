@@ -14,6 +14,11 @@
     "email": "Email",
     "password": "Mat khau"
   },
+  "welcome": {
+    "title": "Biz-eKYC",
+    "description": "Định danh an toàn\nĐối tác tin cậy",
+    "continue": "Tiếp tục"
+  },
   "languageSelection": {
     "title": "Chọn ngôn ngữ",
     "subtitle": "Vui lòng chọn ngôn ngữ bạn muốn sử dụng cho giao diện ứng dụng.",

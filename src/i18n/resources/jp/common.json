@@ -14,6 +14,11 @@
     "email": "メール",
     "password": "パスワード"
   },
+  "welcome": {
+    "title": "Biz-eKYC",
+    "description": "安全な本人確認\n信頼できるパートナーシップ",
+    "continue": "続行"
+  },
   "languageSelection": {
     "title": "言語を選択",
     "subtitle": "アプリの表示に使用する言語を選択してください。",
